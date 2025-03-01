@@ -5,13 +5,8 @@ export default defineNuxtConfig({
   future: {
     compatibilityVersion: 4,
   },
-  css: ["~/assets/css/tailwind.css"],
-  postcss: {
-    plugins: {
-      tailwindcss: {},
-      autoprefixer: {},
-    },
-  },
+  modules: ["@nuxtjs/tailwindcss"],
+  css: ["@/assets/css/common.scss"],
   runtimeConfig: {
     public: {
       ENV: process.env[process.env.NODE_ENV + "_" + "ENV"],

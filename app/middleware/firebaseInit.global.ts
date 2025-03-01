@@ -18,12 +18,16 @@ export default defineNuxtRouteMiddleware(() => {
   if (!config.storageBucket) {
     throw new Error("Runtime config storageBucket is not found.");
   }
+  if (!config.databaseURL) {
+    throw new Error("Runtime config databaseURL is not found.");
+  }
 
   initializeApp({
     apiKey: config.apiKey,
     authDomain: config.authDomain,
     projectId: config.projectId,
     storageBucket: config.storageBucket,
+    databaseURL: "https://lunch-roulette-629e7-default-rtdb.asia-southeast1.firebasedatabase.app/",
   });
 
   const functions = getFunctions(getApp());

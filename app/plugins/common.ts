@@ -1,4 +1,5 @@
 import {
+    deleteObject,
     getDownloadURL,
     getStorage,
     ref as storageRef,
@@ -23,5 +24,20 @@ export default defineNuxtPlugin(() => ({
                 throw error;
             }
         },
+
+        deleteImage: async (path: string): Promise<boolean> => {
+
+            try {
+                const storage = getStorage();
+                const desertRef = storageRef(storage, path);
+    
+                await deleteObject(desertRef);
+
+                return true;
+            } catch (error) {
+                console.error("Failed to delete image:", error);
+                return false;
+            }
+        }
     },
 }));

@@ -1,8 +1,13 @@
 <script setup lang="ts">
   definePageMeta({
    layout: 'roulette'
-  })
-  const hello = ref<string>("Hello");
+  });
+
+const router = useRouter();
+ 
+onMounted(() => {
+  router.replace('/user/choiceOutlet');
+});
 </script>
 
 <template>

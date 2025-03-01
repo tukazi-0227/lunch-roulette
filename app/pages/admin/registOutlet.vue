@@ -1,32 +1,72 @@
 <template>
   <div>
-    <p class="text-2xl text-center font-bold p-3">店舗管理画面</p>
+    <p class="text-2xl text-center font-bold p-3">登録画面</p>
     <div class="p-3">
-      <div class="flex items-center justify-center w-full bg-gray-200 py-2">
-        <p class="w-[30%]">登録名</p>
-        <p class="w-[30%]">画像</p>
-        <p class="w-[30%]">アクセスURL</p>
-      </div>
+      <div>
+        <div class="flex items-center justify-center w-full bg-gray-200 rounded-lg py-2">
+          <p class="w-[20%] text-center font-semibold">登録名</p>
+          <p class="w-[20%] text-center font-semibold">画像</p>
+          <p class="w-[30%] text-center font-semibold">アクセスURL</p>
+          <p class="w-[30%] text-center font-semibold"></p>
+        </div>
 
-      <button class="w-full rounded-lg bg-black text-white p-2" @click="openNew">追加する</button>
+        <div class="w-full h-full-screen overflow-y-auto">
+          <div v-for="(item, index) in outletData" :key="index"
+            class="flex items-center justify-center max-w-full rounded-lg border-2 border-gray-200 my-2">
+            <p class="w-[20%] text-center">{{ item.name }}</p>
+            <div class="w-[20%]">
+              <img v-if="item.imageUrl" :src="item.imageUrl" alt="プレビュー画像" class="size-16 object-cover" />
+              <img v-else-if="imageUrl" :src="imageUrl" alt="登録済画像" class="size-16 object-cover" />
+              <div v-else
+                class="flex size-16 items-center justify-center text-center rounded-lg bg-gray-400 text-white">
+                No image
+              </div>
+            </div>
+            <p class="w-[30%] text-center">{{ item.place }}</p>
+            <div class="w-[30%] flex items-ceter justify-center">
+              <div class="p-2">
+                <div class="bg-black rounded-lg text-xs text-white text-center p-1 px4 my-2" @click="openEdit(item)">
+                  編集する
+                </div>
+                <div class="bg-red-500 rounded-lg text-xs text-white text-center p-1 px-4 my-2"
+                  @click="removeOutlet(item)">
+                  削除する
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center justify-center">
+        <button class="absolute bottom-0 w-[95%] rounded-lg bg-black text-white p-2 my-4" @click="openNew">追加する</button>
+      </div>
     </div>
 
-    <!-- 追加モーダル画面 -->
+    <!-- モーダル画面 -->
     <div v-if="isModalOpen" class="relative">
       <div class="fixed inset-0 bg-gray-500/75"></div>
       <div class="fixed inset-0 flex items-center justify-center">
         <div class="min-w-64 max-h-screen overflow-y-auto rounded-lg border-2 border-gray-400 bg-white">
-          <p class="font-bold text-xl text-center p-2">登録画面</p>
+          <p class="font-bold text-xl text-center p-2">
+            {{ isEditingMode ? "編集" : "新規追加" }}
+          </p>
           <!-- 画像アップロード -->
           <div class="relative flex cursor-pointer items-center justify-center" title="画像を変更する"
-              @click="triggerFileInput">
-              <img v-if="_imagePreview" :src="_imagePreview" alt="プレビュー画像" class="max-h-36 min-w-full object-cover" />
-              <img v-else-if="imageUrl" :src="imageUrl" alt="登録済画像" class="max-h-36 min-w-full object-cover" />
-              <div v-else class="flex min-h-24 min-w-24 items-center justify-center rounded-lg bg-gray-400 text-white">
-                No image
-              </div>
-              <input ref="fileInputRef" type="file" accept="image/*" class="hidden" @change="onImageFileChange" />
+            @click="triggerFileInput">
+            <img v-if="_imagePreview" :src="_imagePreview" alt="プレビュー画像" class="max-h-36 min-w-full object-cover" />
+            <img v-else-if="imageUrl" :src="imageUrl" alt="登録済画像" class="max-h-36 min-w-full object-cover" />
+            <div v-else class="flex min-h-24 min-w-24 items-center justify-center rounded-lg bg-gray-400 text-white">
+              No image
             </div>
+            <input ref="fileInputRef" type="file" accept="image/*" class="hidden" @change="onImageFileChange" />
+            <!-- 画像削除ボタン -->
+            <div class="absolute top-0 right-0 bg-red-500 rounded-full m-2 p-2" @click.stop="deleteImageFile(outletId)">
+              <svg width="16" height="16" class="fill-white" viewBox="0 0 16 16">
+                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+              </svg>
+            </div>
+          </div>
           <!-- 登録名 -->
           <div class="p-2">
             <div class="flex items-center">
@@ -35,7 +75,8 @@
                 必須
               </div>
             </div>
-            <input id="name" type="text" v-model="name" class="w-full rounded-lg border-2 border-gray-200 px-2 py-1.5"/>
+            <input id="name" type="text" v-model="name"
+              class="w-full rounded-lg border-2 border-gray-200 px-2 py-1.5" />
           </div>
           <!-- 場所 -->
           <div class="p-2">
@@ -48,7 +89,7 @@
             <div class="relative w-full">
               <div class="rounded-lg border-2 border-gray-200 px-2 py-1.5" @click="togglePlace">{{ place }}</div>
               <div v-if="isPlace" class="absolute w-full bg-white rounded-lg border-2 border-gray-200">
-                <div v-for="(place, index) in placeDropdown" class="px-2 py-1.5" @click="selectPlace(place)">{{ place }}</div>
+                <div v-for="place in placeDropdown" class="px-2 py-1.5" @click="selectPlace(place)">{{ place }}</div>
               </div>
             </div>
           </div>
@@ -65,16 +106,23 @@
                 キャンセル
               </div>
               <div class="cursor-pointer rounded-full bg-black p-2 px-4 text-center font-semibold text-white"
-                @click="registOutlet({
-                  name: name,
-                  place: place,
-                  detail: detail,
-                  imageUrl: imageUrl,
-                  createdAt: Timestamp.now(),
-                })">
+                @click="registOutlet()">
                 保存する
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ローディング -->
+    <div v-if="isLoading" class="relative z-10 mt-10">
+      <div class="fixed inset-0 bg-gray-500/75"></div>
+      <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full justify-center">
+          <div class="mt-[10%]">
+            <div class="mx-auto my-10 size-24 animate-spin rounded-full border-4 border-black border-t-transparent">
+            </div>
+            <p class="text-center text-2xl font-bold">Loading ...</p>
           </div>
         </div>
       </div>
@@ -83,30 +131,34 @@
 </template>
 
 <script setup lang="ts">
-// import { getApp } from "firebase/app"
-// import { getFunctions, httpsCallable } from "firebase/functions";
 import { Timestamp } from "firebase/firestore";
 // @ts-ignore
-import { addNewOutlet } from "~/composables/outletManagement";
+import { addNewOutlet, getAllOutlet, getOutlet, updateOutlet, deleteOutlet, deleteOutletImageUrl } from "~/composables/outletManagement";
 import type { Outlet } from "@/@types/outlet";
+import { getAuth } from "firebase/auth";
+const auth = getAuth();
+const user = auth.currentUser;
 
-// ドロップダウン
+const outletData = ref<any[]>([]);
+const outletId = ref<string>(crypto.randomUUID());
+
 const isModalOpen = ref<boolean>(false);
 const isEditingMode = ref<boolean>(false);
+const isLoading = ref<boolean>(false);
+
+// ドロップダウン
 const name = ref<string>("");
 const detail = ref<string>("");
+const place = ref<string>("選択する");
 
 const isPlace = ref<boolean>(false);
-const place = ref<string>("選択する");
 const placeDropdown = ref<string[]>([
   "神田",
   "上尾",
 ]);
-
 const togglePlace = () => {
   isPlace.value = !isPlace.value;
 }
-
 const selectPlace = (item: string) => {
   place.value = item;
   togglePlace();
@@ -117,7 +169,6 @@ const imageUrl = ref<string>("");
 const _imageFile = ref<File | null>(null);
 const _imagePreview = ref<string | undefined>(undefined);
 
-// 画像アップロード処理
 const onImageFileChange = (event: Event) => {
   const input = event.target as HTMLInputElement;
   if (!input.files || !input.files[0]) return;
@@ -139,39 +190,136 @@ const triggerFileInput = (event: MouseEvent) => {
   input?.click();
 };
 
+// 画像削除処理
+const deleteImageFile = async (id: string) => {
+  try {
+    isLoading.value = true;
+
+    if (!confirm("画像を削除してよろしいですか?")) return;
+    
+    const data = await getOutlet(id);
+    const decodedUrl = decodeURIComponent(data.outlet.value.imageUrl);
+    const regex = /\/o\/(.*?)\?/;
+    const match = decodedUrl.match(regex);
+
+    // @ts-ignore
+    const resultStorage = await useNuxtApp().$deleteImage(match[1]);
+    if (!resultStorage) {
+      console.error("Storage削除に失敗しました");
+      return;
+    }
+
+    await deleteOutletImageUrl(id);
+    outletData.value = await getAllOutlet();
+    
+    alert("画像を削除しました");
+    closeModal();
+  } catch (error) {
+    console.error("Failed to delete file, try again!!");
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const selectedOutlet = ref<Outlet | null>(null);
+
 // モーダル関連
 // 新規・更新: モーダル画面表示
 const openNew = () => {
   isModalOpen.value = true;
   isEditingMode.value = false;
-  // clearInputs();
+
+  outletId.value = crypto.randomUUID();
+  // フォームクリア
+  name.value = "";
+  detail.value = "";
+  place.value = "選択する";
+  imageUrl.value = "";
+  _imagePreview.value = undefined;
+  selectedOutlet.value = null;
 };
 
-const openEdit = () => {
+const openEdit = (item: Outlet) => {
   isModalOpen.value = true;
   isEditingMode.value = true;
+  selectedOutlet.value = item;
+  outletId.value = item.id;
+  name.value = item.name;
+  detail.value = item.detail;
+  place.value = item.place;
+  imageUrl.value = item.imageUrl;
+  _imagePreview.value = item.imageUrl;
 };
 
 const closeModal = () => {
   isModalOpen.value = false;
-  // clearInputs();
+  clearInput();
 };
 
-const registOutlet = async (registData: Outlet) => {
+const clearInput = () => {
+  name.value = "";
+  place.value = "";
+  detail.value = "";
+  imageUrl.value = "";
+  _imagePreview.value = "";
+}
+
+// 新規追加
+const registOutlet = async () => {
   try {
+    isLoading.value = true;
+
+    let finalImageUrl = imageUrl.value;
     if (_imageFile.value) {
       const filename = encodeURIComponent(_imageFile.value.name);
       const path = `outletImage/${filename}`;
-
       // @ts-ignore
       const url = await useNuxtApp().$uploadImage(_imageFile.value, path);
-      imageUrl.value = url;
-      _imageFile.value = null;
+      finalImageUrl = url;
     }
-    await addNewOutlet(registData);
-    alert("登録に成功しました!!")
+
+    const outlet: Outlet = {
+      id: outletId.value,
+      name: name.value,
+      detail: detail.value,
+      place: place.value,
+      imageUrl: finalImageUrl,
+      createdAt: Timestamp.now(),
+    };
+
+    if (isEditingMode.value) {
+      await updateOutlet(outlet);
+      alert("更新に成功しました!");
+    } else {
+      await addNewOutlet(outlet);
+      alert("登録に成功しました!");
+    }
+    // 一覧更新
+    outletData.value = await getAllOutlet();
+    closeModal();
   } catch (error) {
     console.error("お店情報を登録できませんでした", error);
+  } finally {
+    isLoading.value = false;
   }
 }
+
+// 削除処理
+const removeOutlet = async (item: Outlet) => {
+  if (!confirm(`${item.name} を削除してよろしいですか？`)) return;
+  try {
+    isLoading.value = true;
+    await deleteOutlet(item.id);
+    outletData.value = await getAllOutlet();
+    alert("削除しました！");
+  } catch (error) {
+    console.error("削除に失敗しました", error);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+onMounted(async () => {
+  outletData.value = await getAllOutlet();
+});
 </script>
