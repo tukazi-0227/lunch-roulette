@@ -2,13 +2,13 @@ import type { Outlet } from "@/@types/outlet";
 import { collection, doc, getDoc, getDocs, getFirestore, setDoc } from "firebase/firestore";
 
 // ルーレットするお店をfiresotreに保存
-export const addSelectedOutlets = async (selectedOutlets: Outlet[]) => {
+export const addSelectedOutlets = async (selectedOutlets: Outlet[], userId: string) => {
     try {
         // ルーレット用の一意なID
         const rouletteId: string = crypto.randomUUID();
 
         const db = getFirestore();
-        const rouletteDocRef = doc(db, "roulette", rouletteId);
+        const rouletteDocRef = doc(db, `users/${userId}/roulette`, rouletteId);
         const data = {
             outlets: selectedOutlets,
             createdAt: new Date(),
@@ -24,10 +24,10 @@ export const addSelectedOutlets = async (selectedOutlets: Outlet[]) => {
 };
 
 // ルーレット一覧取得
-export const getAllSelectedOutlet = async (rouletteId: string) => {
+export const getAllSelectedOutlet = async (rouletteId: string, userId: string) => {
     try {
         const db = getFirestore();
-        const rouletteDocRef = doc(db, "roulette", rouletteId);
+        const rouletteDocRef = doc(db, `users/${userId}/roulette`, rouletteId);
         const docSnap = await getDoc(rouletteDocRef);
 
 

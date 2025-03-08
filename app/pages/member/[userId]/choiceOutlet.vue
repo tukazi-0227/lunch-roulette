@@ -4,7 +4,7 @@
     <p class="text-2xl text-center font-bold p-3">設定</p>
     <div>
       <div>
-        <p class="p-4 text-lg font-semibold">遊ぶ人数</p>
+        <p class="p-4 text-lg font-semibold">遊ぶ人数 2～4人</p>
         <div class="text-center text-6xl font-bold">{{ playerNumber }}</div>
         <div class="flex items-center justify-center p-4">
           <div class="cursor-pointer w-1/3 rounded-full bg-black text-center text-white text-5xl mx-5"
@@ -27,6 +27,7 @@
             </div>
           </div>
         </div>
+        <p v-if="errors.place" class="text-red-500 pl-8 font-semibold">エリアを選択してください</p>
       </div>
     </div>
     <div class="flex items-center justify-center">
@@ -70,13 +71,19 @@
 </template>
 
 <script setup lang="ts">
-import { getAuth } from "firebase/auth";
+import { getAuth, type User } from "firebase/auth";
 // @ts-ignore
 import { getAllOutlet } from "~/composables/outletManagement";
-const auth = getAuth();
-const router = useRouter(); 
-const user = auth.currentUser;
 
+definePageMeta({
+  middleware: "auth-client",
+});
+
+const auth = getAuth();
+const route = useRoute();
+const userId = route.params.userId;
+
+const router = useRouter(); 
 const outletData = ref<any[]>([]);
 const outletId = ref<string>(crypto.randomUUID());
 
@@ -84,7 +91,7 @@ const isModalOpen = ref<boolean>(false);
 const isEditingMode = ref<boolean>(false);
 const isLoading = ref<boolean>(false);
 
-const playerNumber = ref<number>(0);
+const playerNumber = ref<number>(2);
 const incrementNum = () => {
   if (playerNumber.value >= 4) {
     return;
@@ -93,7 +100,7 @@ const incrementNum = () => {
 }
 
 const decrementNum = () => {
-  if (playerNumber.value <= 0) return;
+  if (playerNumber.value <= 2) return;
   playerNumber.value--;
 }
 
@@ -116,11 +123,39 @@ const selectPlace = (item: string) => {
   togglePlace();
 }
 
+const errors = ref({
+  place: false,
+});
+
+const validateReset = () => {
+  errors.value.place = false;
+}
+
+const validateData = () => {
+  if (place.value === "選択する") {
+    errors.value.place = true;
+  } else {
+    errors.value.place = false;
+  }
+
+  if (errors.value.place) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
 const goSelectOutlet = () => {
-  router.push({ path: '/user/gameOutlet', query: { num: playerNumber.value, place: place.value }});
+  if(validateData()) {
+    return;
+  }
+  validateReset();
+
+  router.push({ path: `/member/${userId}/gameOutlet`, query: { num: playerNumber.value, place: place.value }});
 }
 
 onMounted(async () => {
   outletData.value = await getAllOutlet();
+  validateReset();
 });
 </script>

@@ -1,6 +1,6 @@
 <template>
   <!-- ローディング -->
-  <div v-if="isLoading" class="relative z-10 mt-10">
+  <div v-if="isLoading" class="relative z-10 my-auto">
     <div class="fixed inset-0 bg-gray-500/75"></div>
     <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
       <div class="flex min-h-full justify-center">

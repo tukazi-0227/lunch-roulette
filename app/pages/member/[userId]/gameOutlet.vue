@@ -1,8 +1,9 @@
 <template>
   <div>
     <div v-if="isSelected">
-      <div class="p-2 text-2xl font-semibold">
+      <div class="p-4 text-2xl font-semibold">
         <p>お店が全てそろいました</p>
+        <p>ルーレットを開始してください</p>
         <p>お店は以下です</p>
       </div>
       <div v-for="item in selectedOutlets" :key="item.id">
@@ -21,8 +22,8 @@
         </div>
       </div>
       <div class="flex items-center justify-center">
-        <button class="absolute bottom-0 w-[95%] rounded-lg bg-black text-white p-2 my-4"
-          @click="startRoulette">スタート</button>
+        <button class="absolute bottom-0 w-[95%] rounded-lg bg-black text-white p-4 my-4 font-semibold"
+          @click="startRoulette">ルーレット画面へ</button>
       </div>
     </div>
     <!-- モーダル画面 -->
@@ -82,21 +83,26 @@
 </template>
 
 <script setup lang="ts">
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
 import type { Outlet } from "@/@types/outlet";
 // @ts-ignore
 import { getOutletsByPlace } from "~/composables/outletManagement";
 // @ts-ignore
 import { addSelectedOutlets } from "~/composables/outletRoulette";
+
+definePageMeta({
+  middleware: "auth-client",
+});
+
 const auth = getAuth();
-const router = useRouter();
 const route = useRoute();
+const userId = route.params.userId;
+const router = useRouter();
 
 const selectedPlace = route.query.place;
 const selectedNumber = Number(route.query.num) || 0;
 const selectedId = ref<string>("");
 
-const user = auth.currentUser;
 
 const outletsData = ref<Outlet[]>([]);
 const selectedOutlets = ref<Outlet[]>([]);
@@ -141,8 +147,8 @@ const startRoulette = async () => {
   try {
     isLoading.value = true;
 
-    const rouletteId = await addSelectedOutlets(selectedOutlets.value);
-    return navigateTo({ path: "/user/rouletteOutlet", query: {roulette_id: rouletteId} });
+    const rouletteId = await addSelectedOutlets(selectedOutlets.value, userId);
+    return router.push({ path: `/member/${userId}/rouletteOutlet`, query: {roulette_id: rouletteId} });
   } catch (error) {
     console.error(error, "ルーレットを始められません")
   } finally {
@@ -151,7 +157,15 @@ const startRoulette = async () => {
 };
 
 onMounted(async () => {
-  outletsData.value = await getOutletsByPlace(selectedPlace);
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const data = await getAllOutlet(user.uid);
+      outletsData.value = data;
+    } else {
+      // ユーザーが未認証の場合の処理
+      outletsData.value = [];
+    }
+  });
   init();
 });
 </script>

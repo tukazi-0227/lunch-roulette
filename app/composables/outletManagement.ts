@@ -2,10 +2,10 @@ import type { Outlet } from "@/@types/outlet";
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, query, setDoc, updateDoc, where } from "firebase/firestore";
 
 // 景品新規追加
-export const addNewOutlet = async (item: Outlet) => {
+export const addNewOutlet = async (item: Outlet, userId: string) => {
     try {
         const db = getFirestore();
-        await setDoc(doc(db, "outlet", item.id), item);
+        await setDoc(doc(db, `users/${userId}/outlet`, item.id), item);
     } catch (error) {
         console.log(error);
         throw new Error("お店情報が登録できませんでした");
@@ -13,10 +13,10 @@ export const addNewOutlet = async (item: Outlet) => {
 };
 
 // 景品一覧取得
-export const getAllOutlet = async () => {
+export const getAllOutlet = async (userId: string) => {
     try {
         const db = getFirestore();
-        const querySnapshot = await getDocs(collection(db, "outlet"));
+        const querySnapshot = await getDocs(collection(db, `users/${userId}/outlet`));
         const data = querySnapshot.docs.map((doc) => doc.data() as Outlet);
 
         return data;
@@ -27,12 +27,12 @@ export const getAllOutlet = async () => {
 };
 
 // 該当景品単一取得
-export const getOutlet = async (id: string) => {
+export const getOutlet = async (id: string, userId: string) => {
 
     const outlet = ref<Outlet>();
     try {
         const db = getFirestore();
-        const outletRef = doc(db, `outlet/${id}`);
+        const outletRef = doc(db, `users/${userId}/outlet/${id}`);
         const outletSnap = await getDoc(outletRef);
 
         if (!outletSnap.exists()) {
@@ -48,10 +48,10 @@ export const getOutlet = async (id: string) => {
 
 
 //　該当景品一覧取得
-export const getOutletsByPlace = async (place: string) => {
+export const getOutletsByPlace = async (place: string, userId: string) => {
     try {
         const db = getFirestore();
-        const q = query(collection(db, "outlet"), where("place", "==", place));
+        const q = query(collection(db, `users/${userId}/outlet`), where("place", "==", place));
         const querySnapshot = await getDocs(q);
 
         const data = querySnapshot.docs.map((doc) => doc.data() as Outlet);
@@ -63,10 +63,10 @@ export const getOutletsByPlace = async (place: string) => {
 };
 
 // 景品更新
-export const updateOutlet = async (item: Outlet) => {
+export const updateOutlet = async (item: Outlet, userId: string) => {
     try {
         const db = getFirestore();
-        await setDoc(doc(db, "outlet", item.id), item);
+        await setDoc(doc(db, `users/${userId}/outlet`, item.id), item);
     } catch (error) {
         console.log(error);
         throw new Error("お店情報が登録できませんでした");
@@ -74,10 +74,10 @@ export const updateOutlet = async (item: Outlet) => {
 };
 
 // 削除処理
-export const deleteOutlet = async (id: string) => {
+export const deleteOutlet = async (id: string, userId: string) => {
     try {
         const db = getFirestore();
-        await deleteDoc(doc(db, "outlet", id));
+        await deleteDoc(doc(db, `users/${userId}/outlet`, id));
     } catch (error) {
         console.log(error);
         throw new Error("お店情報の削除に失敗しました");
@@ -85,10 +85,10 @@ export const deleteOutlet = async (id: string) => {
 };
 
 // 画像のみ削除処理
-export const deleteOutletImageUrl = async (id: string) => {
+export const deleteOutletImageUrl = async (id: string, userId: string) => {
     try {
         const db = getFirestore();
-        const outletRef = doc(db, `outlet/${id}`);
+        const outletRef = doc(db, `users/${userId}/outlet/${id}`);
         await updateDoc(outletRef, { imageUrl: "" });
     } catch (error) {
         console.log(error);

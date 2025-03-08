@@ -1,16 +1,16 @@
 <template>
   <div>
-    <p class="text-2xl text-center font-bold p-3">登録画面</p>
+    <p class="text-2xl text-center font-bold p-2">お店登録画面</p>
     <div class="p-3">
       <div>
-        <div class="flex items-center justify-center w-full bg-gray-200 rounded-lg py-2">
+        <div class="sticky flex items-center justify-center w-full bg-gray-200 rounded-lg py-2">
           <p class="w-[20%] text-center font-semibold">登録名</p>
           <p class="w-[20%] text-center font-semibold">画像</p>
           <p class="w-[30%] text-center font-semibold">アクセスURL</p>
           <p class="w-[30%] text-center font-semibold"></p>
         </div>
 
-        <div class="w-full h-full-screen overflow-y-auto">
+        <div class="w-fulloverflow-y-auto">
           <div v-for="(item, index) in outletData" :key="index"
             class="flex items-center justify-center max-w-full rounded-lg border-2 border-gray-200 my-2">
             <p class="w-[20%] text-center">{{ item.name }}</p>
@@ -36,9 +36,9 @@
             </div>
           </div>
         </div>
-      </div>
-      <div class="flex items-center justify-center">
-        <button class="absolute bottom-0 w-[95%] rounded-lg bg-black text-white p-2 my-4" @click="openNew">追加する</button>
+        <div class="fixed left-0 right-0 bottom-0 flex items-center justify-center">
+          <button class="w-[95%] rounded-lg bg-black text-white p-2 my-4" @click="openNew">追加する</button>
+        </div>
       </div>
     </div>
 
@@ -46,7 +46,7 @@
     <div v-if="isModalOpen" class="relative">
       <div class="fixed inset-0 bg-gray-500/75"></div>
       <div class="fixed inset-0 flex items-center justify-center">
-        <div class="min-w-64 max-h-screen overflow-y-auto rounded-lg border-2 border-gray-400 bg-white">
+        <div class="min-w-80 h-full-screen overflow-y-auto rounded-lg border-2 border-gray-400 bg-white">
           <p class="font-bold text-xl text-center p-2">
             {{ isEditingMode ? "編集" : "新規追加" }}
           </p>
@@ -115,18 +115,7 @@
       </div>
     </div>
     <!-- ローディング -->
-    <div v-if="isLoading" class="relative z-10 mt-10">
-      <div class="fixed inset-0 bg-gray-500/75"></div>
-      <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-        <div class="flex min-h-full justify-center">
-          <div class="mt-[10%]">
-            <div class="mx-auto my-10 size-24 animate-spin rounded-full border-4 border-black border-t-transparent">
-            </div>
-            <p class="text-center text-2xl font-bold">Loading ...</p>
-          </div>
-        </div>
-      </div>
-    </div>
+    <SharedLoading :is-loading="isLoading"/>
   </div>
 </template>
 
@@ -135,11 +124,17 @@ import { Timestamp } from "firebase/firestore";
 // @ts-ignore
 import { addNewOutlet, getAllOutlet, getOutlet, updateOutlet, deleteOutlet, deleteOutletImageUrl } from "~/composables/outletManagement";
 import type { Outlet } from "@/@types/outlet";
-import { getAuth } from "firebase/auth";
-const auth = getAuth();
-const user = auth.currentUser;
+import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
 
-const outletData = ref<any[]>([]);
+definePageMeta({
+  middleware: "auth-client",
+});
+
+const auth = getAuth();
+const route = useRoute();
+const userId = route.params.userId;
+
+const outletData = ref<any[]>( await getAllOutlet(userId));
 const outletId = ref<string>(crypto.randomUUID());
 
 const isModalOpen = ref<boolean>(false);
@@ -197,7 +192,7 @@ const deleteImageFile = async (id: string) => {
 
     if (!confirm("画像を削除してよろしいですか?")) return;
     
-    const data = await getOutlet(id);
+    const data = await getOutlet(id, userId);
     const decodedUrl = decodeURIComponent(data.outlet.value.imageUrl);
     const regex = /\/o\/(.*?)\?/;
     const match = decodedUrl.match(regex);
@@ -209,8 +204,8 @@ const deleteImageFile = async (id: string) => {
       return;
     }
 
-    await deleteOutletImageUrl(id);
-    outletData.value = await getAllOutlet();
+    await deleteOutletImageUrl(id, userId);
+    outletData.value = await getAllOutlet(userId);
     
     alert("画像を削除しました");
     closeModal();
@@ -272,7 +267,7 @@ const registOutlet = async () => {
     let finalImageUrl = imageUrl.value;
     if (_imageFile.value) {
       const filename = encodeURIComponent(_imageFile.value.name);
-      const path = `outletImage/${filename}`;
+      const path = `outletImage/${userId}/${filename}`;
       // @ts-ignore
       const url = await useNuxtApp().$uploadImage(_imageFile.value, path);
       finalImageUrl = url;
@@ -288,14 +283,14 @@ const registOutlet = async () => {
     };
 
     if (isEditingMode.value) {
-      await updateOutlet(outlet);
+      await updateOutlet(outlet, userId);
       alert("更新に成功しました!");
     } else {
-      await addNewOutlet(outlet);
+      await addNewOutlet(outlet, userId);
       alert("登録に成功しました!");
     }
     // 一覧更新
-    outletData.value = await getAllOutlet();
+    outletData.value = await getAllOutlet(userId);
     closeModal();
   } catch (error) {
     console.error("お店情報を登録できませんでした", error);
@@ -309,8 +304,8 @@ const removeOutlet = async (item: Outlet) => {
   if (!confirm(`${item.name} を削除してよろしいですか？`)) return;
   try {
     isLoading.value = true;
-    await deleteOutlet(item.id);
-    outletData.value = await getAllOutlet();
+    await deleteOutlet(item.id, userId);
+    outletData.value = await getAllOutlet(userId);
     alert("削除しました！");
   } catch (error) {
     console.error("削除に失敗しました", error);
@@ -320,6 +315,14 @@ const removeOutlet = async (item: Outlet) => {
 };
 
 onMounted(async () => {
-  outletData.value = await getAllOutlet();
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const data = await getAllOutlet(user.uid);
+      outletData.value = data;
+    } else {
+      // ユーザーが未認証の場合の処理
+      outletData.value = [];
+    }
+  });
 });
 </script>

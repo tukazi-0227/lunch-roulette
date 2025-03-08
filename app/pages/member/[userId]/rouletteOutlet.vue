@@ -25,7 +25,7 @@
     </div>
 
     <!-- ルーレット後は結果表示 -->
-    <div v-if="isLouletted" class="grid items-center justify-center my-32">
+    <div v-if="isLouletted" class="grid items-center justify-center my-8">
       <div class="grid items-center justify-center">
         <img v-if=resultOutlet?.imageUrl :src="resultOutlet?.imageUrl" alt="プレビュー画像" class="size-32 object-cover" />
         <img v-else-if="resultOutlet?.imageUrl" :src="resultOutlet?.imageUrl" alt="登録済画像" class="size-32 object-cover" />
@@ -68,12 +68,15 @@
 </template>
 
 <script setup lang="ts">
+import { getAuth, onAuthStateChanged, } from "firebase/auth";
 import type { Outlet } from "@/@types/outlet";
 // @ts-ignore
 import { getAllSelectedOutlet } from "~/composables/outletRoulette";
+const auth = getAuth();
 const router = useRouter();
 const route = useRoute();
 
+const userId = route.params.userId;
 const rouletteId = route.query.roulette_id;
 const rouletteOutlets = ref<Outlet[]>([]);
 const resultOutlet = ref<Outlet>();
@@ -97,6 +100,7 @@ const statusSlide = () => {
   slideImgaeURL.value = rouletteOutlets.value[currentSlide.value]?.imageUrl as string;
 }
 
+// スライドを移動する
 const moveSlide = (direct: string) => {
   if (direct === "right" && currentSlide.value < rouletteOutlets.value.length - 1) {
     currentSlide.value++;
@@ -106,6 +110,7 @@ const moveSlide = (direct: string) => {
   statusSlide();
 };
 
+// ルーレットを実行
 const roulettingOutlet = () => {
   isLotterying.value = true;
   setTimeout(() => {
@@ -118,11 +123,16 @@ const roulettingOutlet = () => {
 }
 
 const goHome = () => {
-  router.push({ path: '/user/choiceOutlet' });
-}
+  router.push(`/member/${userId}/`);
+};
 
 onMounted(async () => {
-  rouletteOutlets.value = await getAllSelectedOutlet(rouletteId);
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      rouletteOutlets.value = await getAllSelectedOutlet(rouletteId, userId);
+      alert(rouletteOutlets.value);
+    }
+  });
   statusSlide();
-})
+});
 </script>
