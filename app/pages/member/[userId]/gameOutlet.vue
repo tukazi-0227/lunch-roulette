@@ -91,7 +91,7 @@ import { getOutletsByPlace } from "~/composables/outletManagement";
 import { addSelectedOutlets } from "~/composables/outletRoulette";
 
 definePageMeta({
-  middleware: "auth-client",
+  middleware: "auth",
 });
 
 const auth = getAuth();

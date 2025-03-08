@@ -134,4 +134,13 @@ const handleSignIn = async () => {
     alert("ログインに失敗しました");
   }
 };
+
+// 認証チェック
+onMounted(() => {
+  getAuth();
+  const user = auth.currentUser;
+  if (user) {
+    router.push(`/member/${user.uid}`);
+  }
+});
 </script>

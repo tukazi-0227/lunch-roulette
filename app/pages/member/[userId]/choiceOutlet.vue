@@ -76,10 +76,9 @@ import { getAuth, type User } from "firebase/auth";
 import { getAllOutlet } from "~/composables/outletManagement";
 
 definePageMeta({
-  middleware: "auth-client",
+  middleware: "auth",
 });
 
-const auth = getAuth();
 const route = useRoute();
 const userId = route.params.userId;
 
@@ -155,6 +154,7 @@ const goSelectOutlet = () => {
 }
 
 onMounted(async () => {
+  getAuth();
   outletData.value = await getAllOutlet();
   validateReset();
 });

@@ -127,7 +127,7 @@ import type { Outlet } from "@/@types/outlet";
 import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
 
 definePageMeta({
-  middleware: "auth-client",
+  middleware: "auth",
 });
 
 const auth = getAuth();

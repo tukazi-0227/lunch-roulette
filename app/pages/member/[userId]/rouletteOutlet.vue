@@ -72,6 +72,10 @@ import { getAuth, onAuthStateChanged, } from "firebase/auth";
 import type { Outlet } from "@/@types/outlet";
 // @ts-ignore
 import { getAllSelectedOutlet } from "~/composables/outletRoulette";
+definePageMeta({
+  middleware: "auth",
+});
+
 const auth = getAuth();
 const router = useRouter();
 const route = useRoute();

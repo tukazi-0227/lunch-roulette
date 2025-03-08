@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
-  middleware: "auth-client",
+  middleware: "auth",
 });
 
 const route = useRoute();

@@ -54,6 +54,6 @@ const toggleMenu = () => {
 }
 
 onMounted(() => {
-  
+  getAuth();
 })
 </script>

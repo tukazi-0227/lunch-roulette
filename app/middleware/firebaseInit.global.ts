@@ -1,8 +1,7 @@
-import { initializeApp, getApp, getApps } from "firebase/app";
-import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
+import { initializeApp, getApp } from "firebase/app";
 import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
 
-export default defineNuxtPlugin(() => {
+export default defineNuxtRouteMiddleware(() => {
   const config = useRuntimeConfig().public;
   if (!config) {
     throw new Error("Runtime config is not found.");
@@ -23,25 +22,19 @@ export default defineNuxtPlugin(() => {
     throw new Error("Runtime config databaseURL is not found.");
   }
 
-  if (!getApps().length) {
-    initializeApp({
-      apiKey: config.apiKey,
-      authDomain: config.authDomain,
-      projectId: config.projectId,
-      storageBucket: config.storageBucket,
-      databaseURL: config.databaseURL,
-    });
-  }
+  initializeApp({
+    apiKey: config.apiKey,
+    authDomain: config.authDomain,
+    projectId: config.projectId,
+    storageBucket: config.storageBucket,
+    databaseURL: config.databaseURL,
+  });
 
   const functions = getFunctions(getApp());
   functions.region = "asia-northeast1";
 
-  const auth = getAuth();
-  const userState = useState("firebaseUser", () => null) as any;
-  const authReady = useState("firebaseAuthReady", () => false);
-
-  onAuthStateChanged(auth, (user) => {
-    userState.value = user as any;
-    authReady.value = true;
-  });
+  if (process.env.NODE_ENV === "development") {
+    // 開発時はlocalhostを参照する
+    connectFunctionsEmulator(functions, "localhost", 5002);
+  }
 });
