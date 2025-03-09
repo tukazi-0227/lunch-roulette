@@ -8,3 +8,8 @@ export interface Outlet {
     imageUrl: string,
     createdAt: Timestamp,
 };
+
+export interface Place {
+    name: string,
+    placeId: string,
+};

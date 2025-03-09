@@ -23,7 +23,7 @@
           <div class="relative w-[90%]">
             <div class="rounded-lg border-2 border-gray-200 px-2 py-1.5" @click="togglePlace">{{ place }}</div>
             <div v-if="isPlace" class="absolute w-full bg-white rounded-lg border-2 border-gray-200">
-              <div v-for="place in placeDropdown" class="px-2 py-1.5" @click="selectPlace(place)">{{ place }}</div>
+              <div v-for="place in placeDropdown" class="px-2 py-1.5" @click="selectPlace(place.name)">{{ place.name }}</div>
             </div>
           </div>
         </div>
@@ -74,13 +74,14 @@
 import { getAuth, type User } from "firebase/auth";
 // @ts-ignore
 import { getAllOutlet } from "~/composables/outletManagement";
+import type { Place } from "@/@types/outlet"
 
 definePageMeta({
   middleware: "auth",
 });
 
 const route = useRoute();
-const userId = route.params.userId;
+const userId = route.params.userId as string;
 
 const router = useRouter(); 
 const outletData = ref<any[]>([]);
@@ -109,11 +110,7 @@ const detail = ref<string>("");
 const place = ref<string>("選択する");
 
 const isPlace = ref<boolean>(false);
-const placeDropdown = ref<string[]>([
-  "神田",
-  "上尾",
-  "全て",
-]);
+const placeDropdown = ref<Place[]>([]);
 const togglePlace = () => {
   isPlace.value = !isPlace.value;
 }
@@ -156,6 +153,7 @@ const goSelectOutlet = () => {
 onMounted(async () => {
   getAuth();
   outletData.value = await getAllOutlet();
+  placeDropdown.value = await getAllPlaces(userId);
   validateReset();
 });
 </script>

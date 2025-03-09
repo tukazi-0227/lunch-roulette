@@ -1,6 +1,19 @@
 <template>
   <div>
-    <p class="text-2xl text-center font-bold p-2">お店登録画面</p>
+    <div class="relative">
+      <p class="text-2xl text-center font-bold p-2.5">登録画面</p>
+      <button 
+        class="absolute top-0 right-0 w-20 flex justify-center items-center bg-gray-500 rounded-full text-sm p-2 space-x-2 px-2 m-2"
+        @click="togglePlaceModal(true)"
+      >
+        <svg class="size-5 fill-current" viewBox="0 0 16 16">
+          <path
+            d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z" />
+        </svg>
+        <p>場所</p>
+      </button>
+    </div>
+    <!-- 表示画面 -->
     <div class="p-3">
       <div>
         <div class="sticky flex items-center justify-center w-full bg-gray-200 rounded-lg py-2">
@@ -46,6 +59,7 @@
     <div v-if="isModalOpen" class="relative">
       <div class="fixed inset-0 bg-gray-500/75"></div>
       <div class="fixed inset-0 flex items-center justify-center">
+        <!-- お店CRUD -->
         <div class="min-w-80 h-full-screen overflow-y-auto rounded-lg border-2 border-gray-400 bg-white">
           <p class="font-bold text-xl text-center p-2">
             {{ isEditingMode ? "編集" : "新規追加" }}
@@ -62,8 +76,10 @@
             <!-- 画像削除ボタン -->
             <div class="absolute top-0 right-0 bg-red-500 rounded-full m-2 p-2" @click.stop="deleteImageFile(outletId)">
               <svg width="16" height="16" class="fill-white" viewBox="0 0 16 16">
-                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
-                <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+                <path
+                  d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                <path
+                  d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
               </svg>
             </div>
           </div>
@@ -115,7 +131,8 @@
       </div>
     </div>
     <!-- ローディング -->
-    <SharedLoading :is-loading="isLoading"/>
+    <SharedLoading :is-loading="isLoading" />
+    <SharedPlace :is-place-modal="isPlaceModal" :user-id="userId" @close="togglePlaceModal(false)"/>
   </div>
 </template>
 
@@ -132,14 +149,19 @@ definePageMeta({
 
 const auth = getAuth();
 const route = useRoute();
-const userId = route.params.userId;
+const userId = ref<string>("");
+userId.value = route.params.userId as string;
 
-const outletData = ref<any[]>( await getAllOutlet(userId));
+const outletData = ref<any[]>(await getAllOutlet(userId));
 const outletId = ref<string>(crypto.randomUUID());
 
 const isModalOpen = ref<boolean>(false);
 const isEditingMode = ref<boolean>(false);
 const isLoading = ref<boolean>(false);
+const isPlaceModal = ref<boolean>(false);
+const togglePlaceModal = (isPlace: boolean) => {
+  isPlace ? isPlaceModal.value = true : isPlaceModal.value = false;
+};
 
 // ドロップダウン
 const name = ref<string>("");
@@ -191,7 +213,7 @@ const deleteImageFile = async (id: string) => {
     isLoading.value = true;
 
     if (!confirm("画像を削除してよろしいですか?")) return;
-    
+
     const data = await getOutlet(id, userId);
     const decodedUrl = decodeURIComponent(data.outlet.value.imageUrl);
     const regex = /\/o\/(.*?)\?/;
@@ -206,7 +228,7 @@ const deleteImageFile = async (id: string) => {
 
     await deleteOutletImageUrl(id, userId);
     outletData.value = await getAllOutlet(userId);
-    
+
     alert("画像を削除しました");
     closeModal();
   } catch (error) {

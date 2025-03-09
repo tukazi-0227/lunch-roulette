@@ -98,7 +98,7 @@ const handleSignUp = async () => {
     if (user) {
       // ユーザーデータ登録時userId取得
       const userId = await addUserInfo(userInfo);
-      router.push(`/member/${userId}/choiceOutlet`);
+      router.push(`/member/${userId}/`);
     }
   } catch (error) {
     console.error("サインインエラー", error);
@@ -127,7 +127,7 @@ const handleSignIn = async () => {
 
     const user = userCredential.user;
     if (user) {
-      router.push(`/member/${user.uid}/choiceOutlet`);
+      router.push(`/member/${user.uid}/`);
     }
   } catch (error) {
     console.error("サインインエラー", error);

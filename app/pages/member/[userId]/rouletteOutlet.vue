@@ -134,7 +134,6 @@ onMounted(async () => {
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       rouletteOutlets.value = await getAllSelectedOutlet(rouletteId, userId);
-      alert(rouletteOutlets.value);
     }
   });
   statusSlide();
