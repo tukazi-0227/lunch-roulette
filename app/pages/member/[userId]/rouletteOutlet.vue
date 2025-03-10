@@ -1,43 +1,36 @@
 <template>
   <div>
     <p class="font-bold text-center text-3xl p-3">ルーレット画面</p>
-    <div class="grid items-center justify-center my-5">
-      <img v-if=slideImgaeURL :src="slideImgaeURL" alt="プレビュー画像" class="size-64 object-cover" />
-      <img v-else-if="slideImgaeURL" :src="slideImgaeURL" alt="登録済画像" class="size-64 object-cover" />
-      <div v-else class="flex size-64 items-center justify-center text-center rounded-lg bg-gray-400 text-white">
-        No image
-      </div>
-      <div class="flex items-center justify-between p-5">
-        <div @click="moveSlide(`left`)">
-          <svg class="size-8 fill-current -rotate-90" viewBox="0 0 16 16">
-            <path fill-rule="evenodd"
-              d="M7.022 1.566a1.13 1.13 0 0 1 1.96 0l6.857 11.667c.457.778-.092 1.767-.98 1.767H1.144c-.889 0-1.437-.99-.98-1.767z" />
-          </svg>
-        </div>
-        <div class="text-center font-semibold">{{ slideName }}</div>
-        <div @click="moveSlide(`right`)">
-          <svg class="size-8 fill-current rotate-90" viewBox="0 0 16 16">
-            <path fill-rule="evenodd"
-              d="M7.022 1.566a1.13 1.13 0 0 1 1.96 0l6.857 11.667c.457.778-.092 1.767-.98 1.767H1.144c-.889 0-1.437-.99-.98-1.767z" />
-          </svg>
+    <div class="flex overflow-x-auto flex-nowrap">
+      <div v-for="outlet in rouletteOutlets" class="flex-shrink-0">
+        <div class="p-2">
+          <img v-if="outlet.imageUrl" :src="outlet.imageUrl" alt="プレビュー画像" class="size-48 object-cover rounded-lg" />
+          <img v-else-if="outlet.imageUrl" :src="outlet.imageUrl" alt="登録済画像" class="size-48 object-cover rounded-lg" />
+          <div v-else class="flex size-48 items-center justify-center text-center rounded-lg bg-gray-400 text-white">
+            No image
+          </div>
+          <p class="text-center p-2 font-semibold">{{ outlet.name }}</p>
         </div>
       </div>
     </div>
 
     <!-- ルーレット後は結果表示 -->
-    <div v-if="isLouletted" class="grid items-center justify-center my-8">
+    <div v-if="isLouletted" class="grid items-center justify-center my-5">
       <div class="grid items-center justify-center">
         <img v-if=resultOutlet?.imageUrl :src="resultOutlet?.imageUrl" alt="プレビュー画像" class="size-32 object-cover" />
-        <img v-else-if="resultOutlet?.imageUrl" :src="resultOutlet?.imageUrl" alt="登録済画像" class="size-32 object-cover" />
+        <img v-else-if="resultOutlet?.imageUrl" :src="resultOutlet?.imageUrl" alt="登録済画像"
+          class="size-32 object-cover" />
         <div v-else class="flex size-32 items-center justify-center text-center rounded-lg bg-gray-400 text-white">
           No image
         </div>
       </div>
-      <p class="py-5">あなたのお昼は{{ resultOutlet?.name }}</p>
-      <div class="bg-black text-white font-semi-bold text-xl text-center p-2 px-4 rounded-2xl" @click="goHome">最初から</div>
+      <p class="py-2">あなたのお昼は{{ resultOutlet?.name }}</p>
+      <div class="bg-black text-white font-semi-bold text-xl text-center p-2 px-4 rounded-2xl" @click="goHome">最初から
+      </div>
     </div>
     <div v-else class="flex items-center justify-center my-32">
-      <div class="bg-black text-white rounded-2xl text-3xl p-4 px-4 text-center" @click="roulettingOutlet">ルーレットスタート!!</div>
+      <div class="bg-black text-white rounded-2xl text-3xl p-4 px-4 text-center" @click="roulettingOutlet">ルーレットスタート!!
+      </div>
     </div>
 
     <!-- ローディング -->
@@ -51,15 +44,17 @@
         <div class="m-2 max-h-full rounded-2xl border-2 border-gray-400 bg-white">
           <p class="text-3xl text-center font-bold p-3">あなたの今日のお昼</p>
           <div class="grid items-center justify-center my-5">
-            <img v-if=resultOutlet?.imageUrl :src="resultOutlet?.imageUrl" alt="プレビュー画像" class="size-96 object-cover" />
-            <img v-else-if="resultOutlet?.imageUrl" :src="resultOutlet?.imageUrl" alt="登録済画像" class="size-96 object-cover" />
-            <div v-else class="flex size-96 items-center justify-center text-center rounded-lg bg-gray-400 text-white">
+            <img v-if=resultOutlet?.imageUrl :src="resultOutlet?.imageUrl" alt="プレビュー画像" class="size-48 object-cover" />
+            <img v-else-if="resultOutlet?.imageUrl" :src="resultOutlet?.imageUrl" alt="登録済画像"
+              class="size-48 object-cover" />
+            <div v-else class="flex size-48 items-center justify-center text-center rounded-lg bg-gray-400 text-white">
               No image
             </div>
             <p class="text-xl text-center font-bold p-3">{{ resultOutlet?.name }}</p>
           </div>
           <div class="flex items-center justify-center py-6">
-            <div class="bg-black text-white font-semi-bold text-xl text-center p-2 px-4 rounded-2xl" @click="closeModal">閉じる</div>
+            <div class="bg-black text-white font-semi-bold text-xl text-center p-2 px-4 rounded-2xl"
+              @click="closeModal">閉じる</div>
           </div>
         </div>
       </div>
@@ -92,26 +87,6 @@ const isModal = ref<boolean>(false);
 
 const closeModal = () => {
   isModal.value = false;
-}
-
-// スライドショー
-const slideName = ref<string>("No image");
-const slideImgaeURL = ref<string>("");
-const currentSlide = ref<number>(0);
-
-const statusSlide = () => {
-  slideName.value = rouletteOutlets.value[currentSlide.value]?.name as string;
-  slideImgaeURL.value = rouletteOutlets.value[currentSlide.value]?.imageUrl as string;
-}
-
-// スライドを移動する
-const moveSlide = (direct: string) => {
-  if (direct === "right" && currentSlide.value < rouletteOutlets.value.length - 1) {
-    currentSlide.value++;
-  } else if (direct === "left" && currentSlide.value > 0) {
-    currentSlide.value--;
-  };
-  statusSlide();
 };
 
 // ルーレットを実行
@@ -136,6 +111,5 @@ onMounted(async () => {
       rouletteOutlets.value = await getAllSelectedOutlet(rouletteId, userId);
     }
   });
-  statusSlide();
 });
 </script>

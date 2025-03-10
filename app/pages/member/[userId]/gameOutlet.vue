@@ -159,7 +159,7 @@ const startRoulette = async () => {
 onMounted(async () => {
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      const data = await getAllOutlet(user.uid);
+      const data = await getOutletsByPlace(selectedPlace, user.uid);
       outletsData.value = data;
     } else {
       // ユーザーが未認証の場合の処理

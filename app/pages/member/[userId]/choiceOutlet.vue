@@ -22,7 +22,7 @@
         <div class="flex items-center justify-center">
           <div class="relative w-[90%]">
             <div class="rounded-lg border-2 border-gray-200 px-2 py-1.5" @click="togglePlace">{{ place }}</div>
-            <div v-if="isPlace" class="absolute w-full bg-white rounded-lg border-2 border-gray-200">
+            <div v-if="isPlace" class="absolute w-full bg-white rounded-lg border-2 border-gray-200 h-24 overflow-y-auto z-10">
               <div v-for="place in placeDropdown" class="px-2 py-1.5" @click="selectPlace(place.name)">{{ place.name }}</div>
             </div>
           </div>
