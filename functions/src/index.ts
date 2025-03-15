@@ -18,6 +18,7 @@ interface FunctionsObj {
 // ここに定義を追加していく
 const funcs: FunctionsObj = {
   api_sample_index: "./sample/index",
+  api_google_addOutlet: "./google/add-newOutlet",
 };
 
 const loadFunctions = (functionsObj: FunctionsObj) => {

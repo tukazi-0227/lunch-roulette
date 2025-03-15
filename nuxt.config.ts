@@ -16,6 +16,7 @@ export default defineNuxtConfig({
       storageBucket: process.env[process.env.NODE_ENV + "_" + "storageBucket"],
       databaseURL: process.env[process.env.NODE_ENV + "_" + "databaseURL"],
       SENTRY_KEY: process.env.SENTRY_KEY,
+      GOOGLE_MAPS_API_KEY: process.env.NUXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     },
   },
 })

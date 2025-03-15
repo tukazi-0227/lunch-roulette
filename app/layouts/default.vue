@@ -4,7 +4,7 @@
 
 <template>
   <div>
-    <SharedHeader />
+    <SharedHeader class="sticky top-0"/>
     <slot />
   </div>
 </template>

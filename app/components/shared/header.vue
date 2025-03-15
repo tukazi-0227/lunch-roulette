@@ -9,7 +9,7 @@
         </svg>
       </div>
       <div v-if="isMenu" class="absolute top-full w-32 bg-gray-700 rounded-b-lg">
-        <div v-for="menu in menus">
+        <div v-for="(menu, index) in menus" :key="index">
           <p class="p-3" @click="goPageBySelectMenu(menu)">{{ menu }}</p>
         </div>
       </div>
@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { getAuth, signOut, type User } from 'firebase/auth';
+import { getAuth, signOut, } from 'firebase/auth';
 
 const auth = getAuth();
 const route = useRoute();
@@ -55,5 +55,6 @@ const toggleMenu = () => {
 
 onMounted(() => {
   getAuth();
+  isMenu.value = false;
 })
 </script>
