@@ -1,3 +1,55 @@
+<script setup lang="ts">
+import { getAuth, onAuthStateChanged, } from "firebase/auth";
+import type { Outlet } from "@/@types/outlet";
+// @ts-ignore
+import { getAllSelectedOutlet } from "~/composables/outletRoulette";
+definePageMeta({
+  middleware: "auth",
+});
+
+const auth = getAuth();
+const router = useRouter();
+const route = useRoute();
+
+const userId = route.params.userId;
+const rouletteId = route.query.roulette_id;
+const rouletteOutlets = ref<Outlet[]>([]);
+const resultOutlet = ref<Outlet>();
+
+const isLoading = ref<boolean>(false);
+const isLotterying = ref<boolean>(false);
+const isLouletted = ref<boolean>(false);
+const isModal = ref<boolean>(false);
+
+const closeModal = () => {
+  isModal.value = false;
+};
+
+// ルーレットを実行
+const roulettingOutlet = () => {
+  isLotterying.value = true;
+  setTimeout(() => {
+    const randomIndex = Math.floor(Math.random() * rouletteOutlets.value.length);
+    resultOutlet.value = rouletteOutlets.value[randomIndex];
+    isLotterying.value = false;
+    isModal.value = true;
+    isLouletted.value = true;
+  }, 5000);
+}
+
+const goHome = () => {
+  router.push(`/member/${userId}/`);
+};
+
+onMounted(async () => {
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      rouletteOutlets.value = await getAllSelectedOutlet(rouletteId, userId);
+    }
+  });
+});
+</script>
+
 <template>
   <div>
     <p class="font-bold text-center text-3xl p-3">ルーレット画面</p>
@@ -61,55 +113,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { getAuth, onAuthStateChanged, } from "firebase/auth";
-import type { Outlet } from "@/@types/outlet";
-// @ts-ignore
-import { getAllSelectedOutlet } from "~/composables/outletRoulette";
-definePageMeta({
-  middleware: "auth",
-});
-
-const auth = getAuth();
-const router = useRouter();
-const route = useRoute();
-
-const userId = route.params.userId;
-const rouletteId = route.query.roulette_id;
-const rouletteOutlets = ref<Outlet[]>([]);
-const resultOutlet = ref<Outlet>();
-
-const isLoading = ref<boolean>(false);
-const isLotterying = ref<boolean>(false);
-const isLouletted = ref<boolean>(false);
-const isModal = ref<boolean>(false);
-
-const closeModal = () => {
-  isModal.value = false;
-};
-
-// ルーレットを実行
-const roulettingOutlet = () => {
-  isLotterying.value = true;
-  setTimeout(() => {
-    const randomIndex = Math.floor(Math.random() * rouletteOutlets.value.length);
-    resultOutlet.value = rouletteOutlets.value[randomIndex];
-    isLotterying.value = false;
-    isModal.value = true;
-    isLouletted.value = true;
-  }, 5000);
-}
-
-const goHome = () => {
-  router.push(`/member/${userId}/`);
-};
-
-onMounted(async () => {
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      rouletteOutlets.value = await getAllSelectedOutlet(rouletteId, userId);
-    }
-  });
-});
-</script>

@@ -5,7 +5,7 @@
       <div class="fixed inset-0 bg-gray-500/75"></div>
       <div class="fixed inset-0 flex items-center justify-center">
         <!-- 場所CRUD -->
-        <div class="relative w-80 h-80 h-full-screen overflow-y-auto rounded-lg border-2 border-gray-400 bg-white">
+        <div class="relative w-80 h-96 h-full-screen overflow-y-auto rounded-lg border-2 border-gray-400 bg-white">
           <p class="text-center text-xl font-semibold p-2">場所登録</p>
           <button class="absolute top-0 right-0 p-3" @click="closePlaceModal">
             <svg class="fill-current size-5" viewBox="0 0 16 16">
@@ -18,13 +18,22 @@
             <!-- 場所 -->
             <input id="name" type="text" v-model="name" class="w-3/4 rounded-lg border-2 border-gray-200 px-2 py-1.5" />
             <!-- ボタン -->
-            <button class="w-1/4 cursor-pointer rounded-full bg-black p-2 px-4 text-center font-semibold text-white"
+            <button 
+              class="w-1/4 cursor-pointer rounded-full bg-black p-2 px-4 text-center font-semibold text-white"
+              :class="{'pointer-events-none bg-gray-500': places.length >= 4}"
               @click="addPlace">
               追加
             </button>
           </div>
 
-          <div class="border-2 border-gray-500 rounded-xl m-2 mt-4 p-2 h-48 overflow-y-auto">
+          <!-- 場所の総数 -->
+          <div class="flex items-center px-2 font-semibold">
+            <p class="text-sm">登録場所: </p>
+            <p class="px-2 text-md">{{ places.length }}</p>
+            <p class="text-sm text-gray-400">(最大4カ所まで)</p>
+          </div>
+          <!-- 場所一覧 -->
+          <div class="border-2 border-gray-500 rounded-xl mx-2 my-2 p-2 h-[230px] overflow-y-auto">
             <div v-for="place in places">
               <div class="flex items-center">
                 <p class="p-1 bg-black rounded-full"></p>

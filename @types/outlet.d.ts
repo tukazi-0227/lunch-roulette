@@ -13,3 +13,13 @@ export interface Place {
     name: string,
     placeId: string,
 };
+
+export interface ToComPonentForm {
+    selectedOutlet: any,
+    outletId: string,
+    name: string,
+    detail: string,
+    place: string,
+    imageUrl: string,
+    _imagePreview: string,
+}

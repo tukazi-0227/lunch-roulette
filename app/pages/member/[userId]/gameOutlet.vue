@@ -1,3 +1,99 @@
+<script setup lang="ts">
+import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
+import type { Outlet } from "@/@types/outlet";
+// @ts-ignore
+import { getOutletsByPlace } from "~/composables/outletManagement";
+// @ts-ignore
+import { addSelectedOutlets } from "~/composables/outletRoulette";
+
+definePageMeta({
+  middleware: "auth",
+});
+
+const auth = getAuth();
+const route = useRoute();
+const userId = route.params.userId;
+const router = useRouter();
+
+const selectedPlace = route.query.place;
+const selectedNumber = ref<number>(0);
+const checkNumber = () => {
+  if (selectedNumber.value > 4) {
+    selectedNumber.value = 4;
+  } else if (selectedNumber.value < 1) {
+    selectedNumber.value = 1;
+  }
+};
+
+const selectedId = ref<string>("");
+
+
+const outletsData = ref<Outlet[]>([]);
+const selectedOutlets = ref<Outlet[]>([]);
+
+const isModalOpen = ref<boolean>(false);
+const isSelecting = ref<boolean>(false);
+const isSelected = ref<boolean>(false);
+const isLoading = ref<boolean>(false);
+
+const init = () => {
+  isModalOpen.value = true;
+  isSelecting.value = true;
+}
+const checkAddCount = () => {
+  if (selectedOutlets.value.length >= selectedNumber.value) {
+    isModalOpen.value = false;
+    isSelected.value = true;
+  } else if (isSelecting.value) {
+    // まだ終わっていない場合は次の人画面へ
+    isSelecting.value = false;
+    selectedId.value = "";
+  } else {
+    // 次の人画面から選択画面へ
+    isSelecting.value = true;
+  }
+};
+
+const pushOutlet = (outletId: string) => {
+  const outlet = outletsData.value.find((item) => item.id === outletId) as Outlet;
+  if (!outlet) {
+    console.error("No outlet item");
+    return;
+  }
+  selectedOutlets.value.push(outlet);
+  checkAddCount();
+};
+
+// ルーレット開始ページへ
+const startRoulette = async () => {
+  try {
+    isLoading.value = true;
+
+    const rouletteId = await addSelectedOutlets(selectedOutlets.value, userId);
+    return router.push({ path: `/member/${userId}/rouletteOutlet`, query: {roulette_id: rouletteId} });
+  } catch (error) {
+    console.error(error, "ルーレットを始められません")
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+onMounted(async () => {
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const data = await getOutletsByPlace(selectedPlace, user.uid);
+      outletsData.value = data;
+    } else {
+      // ユーザーが未認証の場合の処理
+      outletsData.value = [];
+    }
+  });
+  init();
+  selectedNumber.value = Number(route.query.num);
+  checkNumber();
+});
+</script>
+
 <template>
   <div>
     <div v-if="isSelected">
@@ -81,91 +177,3 @@
     <SharedLoading :is-loading="isLoading"/>
   </div>
 </template>
-
-<script setup lang="ts">
-import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
-import type { Outlet } from "@/@types/outlet";
-// @ts-ignore
-import { getOutletsByPlace } from "~/composables/outletManagement";
-// @ts-ignore
-import { addSelectedOutlets } from "~/composables/outletRoulette";
-
-definePageMeta({
-  middleware: "auth",
-});
-
-const auth = getAuth();
-const route = useRoute();
-const userId = route.params.userId;
-const router = useRouter();
-
-const selectedPlace = route.query.place;
-const selectedNumber = Number(route.query.num) || 0;
-const selectedId = ref<string>("");
-
-
-const outletsData = ref<Outlet[]>([]);
-const selectedOutlets = ref<Outlet[]>([]);
-
-const isModalOpen = ref<boolean>(false);
-const isSelecting = ref<boolean>(false);
-const isSelected = ref<boolean>(false);
-const isLoading = ref<boolean>(false);
-
-const playerNumber = ref<number>(0);
-
-const init = () => {
-  isModalOpen.value = true;
-  isSelecting.value = true;
-}
-const checkAddCount = () => {
-  if (selectedOutlets.value.length >= selectedNumber) {
-    isModalOpen.value = false;
-    isSelected.value = true;
-  } else if (isSelecting.value) {
-    // まだ終わっていない場合は次の人画面へ
-    isSelecting.value = false;
-    selectedId.value = "";
-  } else {
-    // 次の人画面から選択画面へ
-    isSelecting.value = true;
-  }
-};
-
-const pushOutlet = (outletId: string) => {
-  const outlet = outletsData.value.find((item) => item.id === outletId) as Outlet;
-  if (!outlet) {
-    console.error("No outlet item");
-    return;
-  }
-  selectedOutlets.value.push(outlet);
-  checkAddCount();
-};
-
-// ルーレット開始ページへ
-const startRoulette = async () => {
-  try {
-    isLoading.value = true;
-
-    const rouletteId = await addSelectedOutlets(selectedOutlets.value, userId);
-    return router.push({ path: `/member/${userId}/rouletteOutlet`, query: {roulette_id: rouletteId} });
-  } catch (error) {
-    console.error(error, "ルーレットを始められません")
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-onMounted(async () => {
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      const data = await getOutletsByPlace(selectedPlace, user.uid);
-      outletsData.value = data;
-    } else {
-      // ユーザーが未認証の場合の処理
-      outletsData.value = [];
-    }
-  });
-  init();
-});
-</script>
