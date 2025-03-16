@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { Outlet, Place, ToComPonentForm } from "@/@types/outlet";
+import { getApp } from "firebase/app";
 import { Timestamp } from "firebase/firestore";
+import { getFunctions, httpsCallable } from "firebase/functions";
 
 const props = defineProps({
   isModalOpen: {
@@ -123,10 +125,10 @@ watch(
   (newVal) => {
     if (!newVal) return
     outletId.value = newVal.outletId || ""
-    name.value      = newVal.name      || ""
-    detail.value    = newVal.detail    || ""
-    place.value     = newVal.place     || "選択する"
-    imageUrl.value  = newVal.imageUrl  || ""
+    name.value = newVal.name || ""
+    detail.value = newVal.detail || ""
+    place.value = newVal.place || "選択する"
+    imageUrl.value = newVal.imageUrl || ""
     _imagePreview.value = newVal._imagePreview || ""
   },
   { immediate: true }
@@ -210,6 +212,20 @@ const registOutlet = async () => {
       await updateOutlet(outlet, props.userId);
       alert("更新に成功しました!");
     } else {
+      // 新規追加時サーバーサイドでバリデーション
+      const functions = getFunctions(getApp());
+      const apply = httpsCallable(
+        functions,
+        "api_validate_outletSum-check_outletSum",
+      );
+
+      const response = await apply(props.userId);
+
+      if (response.data) {
+        alert("登録上限です.")
+        return;
+      };
+
       await addNewOutlet(outlet, props.userId);
       alert("登録に成功しました!");
     }
@@ -234,110 +250,107 @@ onMounted(async () => {
 <template>
   <!-- モーダル画面 -->
   <div v-if="isModalOpen" class="relative">
-      <div class="fixed inset-0 bg-gray-500/75"></div>
-      <div class="fixed inset-0 flex items-center justify-center">
-        <!-- お店CRUD -->
-        <div class="relative min-w-80 h-full-screen overflow-y-auto rounded-lg border-2 border-gray-400 bg-white">
-          <div class="font-bold text-xl text-center p-2">
-            {{ isEditingMode ? "編集" : "新規追加" }}
-          </div>
-          <div v-if="!isEditingMode" class="absolute top-0 right-0">
-            <!-- Googleモード -->
-            <div class="flex items-center justify-between pt-2 pr-2">
-              <label class="inline-flex items-center cursor-pointer">
-                <div class="px-2">
-                  <svg class="fill-current size-4" viewBox="0 0 16 16">
-                    <path
-                      d="M15.545 6.558a9.4 9.4 0 0 1 .139 1.626c0 2.434-.87 4.492-2.384 5.885h.002C11.978 15.292 10.158 16 8 16A8 8 0 1 1 8 0a7.7 7.7 0 0 1 5.352 2.082l-2.284 2.284A4.35 4.35 0 0 0 8 3.166c-2.087 0-3.86 1.408-4.492 3.304a4.8 4.8 0 0 0 0 3.063h.003c.635 1.893 2.405 3.301 4.492 3.301 1.078 0 2.004-.276 2.722-.764h-.003a3.7 3.7 0 0 0 1.599-2.431H8v-3.08z" />
-                  </svg>
-                </div>
-                <input type="checkbox" v-model="isGoogle" value="true" class="sr-only peer">
-                <div
-                  class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600">
-                </div>
-              </label>
-            </div>
-          </div>
-          <div v-if="isGoogle" class="flex items-center justify-center">
-            <div class="w-full ">
-              <div class="p-2">
-                <p class="font-bold mr-1">Google検索</p>
-                <input ref="autocompleteInput" type="text" placeholder="お店の名前を検索"
-                  class="w-full rounded-lg border-2 border-gray-200 px-2 py-1.5" />
-              </div>
-              <img v-if="imageUrl" :src="imageUrl" alt="登録済画像" class="max-h-36 min-w-full object-cover" />
-            </div>
-          </div>
-          <div v-else>
-            <!-- 画像アップロード -->
-            <div class="relative flex cursor-pointer items-center justify-center" title="画像を変更する"
-              @click="triggerFileInput">
-              <img v-if="_imagePreview" :src="_imagePreview" alt="プレビュー画像" class="max-h-36 min-w-full object-cover" />
-              <img v-else-if="imageUrl" :src="imageUrl" alt="登録済画像" class="max-h-36 min-w-full object-cover" />
-              <div v-else class="flex min-h-24 min-w-24 items-center justify-center rounded-lg bg-gray-400 text-white">
-                No image
-              </div>
-              <input ref="fileInputRef" type="file" accept="image/*" class="hidden" @change="onImageFileChange" />
-              <!-- 画像削除ボタン -->
-              <div class="absolute top-0 right-0 bg-red-500 rounded-full m-2 p-2"
-                @click.stop="deleteImageFile(outletId)">
-                <svg width="16" height="16" class="fill-white" viewBox="0 0 16 16">
+    <div class="fixed inset-0 bg-gray-500/75"></div>
+    <div class="fixed inset-0 flex items-center justify-center">
+      <!-- お店CRUD -->
+      <div class="relative min-w-80 h-full-screen overflow-y-auto rounded-lg border-2 border-gray-400 bg-white">
+        <div class="font-bold text-xl text-center p-2">
+          {{ isEditingMode ? "編集" : "新規追加" }}
+        </div>
+        <div v-if="!isEditingMode" class="absolute top-0 right-0">
+          <!-- Googleモード -->
+          <div class="flex items-center justify-between pt-2 pr-2">
+            <label class="inline-flex items-center cursor-pointer">
+              <div class="px-2">
+                <svg class="fill-current size-4" viewBox="0 0 16 16">
                   <path
-                    d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
-                  <path
-                    d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+                    d="M15.545 6.558a9.4 9.4 0 0 1 .139 1.626c0 2.434-.87 4.492-2.384 5.885h.002C11.978 15.292 10.158 16 8 16A8 8 0 1 1 8 0a7.7 7.7 0 0 1 5.352 2.082l-2.284 2.284A4.35 4.35 0 0 0 8 3.166c-2.087 0-3.86 1.408-4.492 3.304a4.8 4.8 0 0 0 0 3.063h.003c.635 1.893 2.405 3.301 4.492 3.301 1.078 0 2.004-.276 2.722-.764h-.003a3.7 3.7 0 0 0 1.599-2.431H8v-3.08z" />
                 </svg>
               </div>
+              <input type="checkbox" v-model="isGoogle" value="true" class="sr-only peer">
+              <div
+                class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600">
+              </div>
+            </label>
+          </div>
+        </div>
+        <div v-if="isGoogle" class="flex items-center justify-center">
+          <div class="w-full ">
+            <div class="p-2">
+              <p class="font-bold mr-1">Google検索</p>
+              <input ref="autocompleteInput" type="text" placeholder="お店の名前を検索"
+                class="w-full rounded-lg border-2 border-gray-200 px-2 py-1.5" />
+            </div>
+            <img v-if="imageUrl" :src="imageUrl" alt="登録済画像" class="max-h-36 min-w-full object-cover" />
+          </div>
+        </div>
+        <div v-else>
+          <!-- 画像アップロード -->
+          <div class="relative flex cursor-pointer items-center justify-center" title="画像を変更する"
+            @click="triggerFileInput">
+            <img v-if="_imagePreview" :src="_imagePreview" alt="プレビュー画像" class="max-h-36 min-w-full object-cover" />
+            <img v-else-if="imageUrl" :src="imageUrl" alt="登録済画像" class="max-h-36 min-w-full object-cover" />
+            <div v-else class="flex min-h-24 min-w-24 items-center justify-center rounded-lg bg-gray-400 text-white">
+              No image
+            </div>
+            <input ref="fileInputRef" type="file" accept="image/*" class="hidden" @change="onImageFileChange" />
+            <!-- 画像削除ボタン -->
+            <div class="absolute top-0 right-0 bg-red-500 rounded-full m-2 p-2" @click.stop="deleteImageFile(outletId)">
+              <svg width="16" height="16" class="fill-white" viewBox="0 0 16 16">
+                <path
+                  d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                <path
+                  d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+              </svg>
             </div>
           </div>
-          <!-- 登録名 -->
-          <div class="p-2">
-            <div class="flex items-center">
-              <p class="font-bold mr-1">登録名</p>
-              <div class="rounded-lg bg-red-500 px-1.5 py-0.5 text-center text-xs font-semibold text-white">
-                必須
-              </div>
-            </div>
-            <input id="name" type="text" v-model="name"
-              class="w-full rounded-lg border-2 border-gray-200 px-2 py-1.5" />
-          </div>
-          <!-- 場所 -->
-          <div class="p-2">
-            <div class="flex items-center">
-              <p class="font-bold mr-1">場所</p>
-              <div class="rounded-lg bg-red-500 px-1.5 py-0.5 text-center text-xs font-semibold text-white">
-                必須
-              </div>
-            </div>
-            <div class="relative w-full">
-              <div class="rounded-lg border-2 border-gray-200 px-2 py-1.5" @click="togglePlace">{{ place }}</div>
-              <div v-if="isPlace" class="absolute w-full bg-white rounded-lg border-2 border-gray-200">
-                <div v-for="place in placeDropdown" class="px-2 py-1.5" @click="selectPlace(place.name)">{{ place.name
-                }}</div>
-              </div>
+        </div>
+        <!-- 登録名 -->
+        <div class="p-2">
+          <div class="flex items-center">
+            <p class="font-bold mr-1">登録名</p>
+            <div class="rounded-lg bg-red-500 px-1.5 py-0.5 text-center text-xs font-semibold text-white">
+              必須
             </div>
           </div>
-          <!-- 詳細 -->
-          <div class="p-2">
-            <p class="font-bold">詳細</p>
-            <textarea id="description" type="text" placeholder="詳細" v-model="detail"
-              class="w-full min-h-20 rounded-lg border-2 border-gray-200 px-2 py-1.5"></textarea>
+          <input id="name" type="text" v-model="name" class="w-full rounded-lg border-2 border-gray-200 px-2 py-1.5" />
+        </div>
+        <!-- 場所 -->
+        <div class="p-2">
+          <div class="flex items-center">
+            <p class="font-bold mr-1">場所</p>
+            <div class="rounded-lg bg-red-500 px-1.5 py-0.5 text-center text-xs font-semibold text-white">
+              必須
+            </div>
           </div>
-          <!-- ボタン -->
-          <div class="bg-gray-100">
-            <div class="flex items-center justify-between p-2">
-              <div class="cursor-pointer p-2 text-center font-semibold" @click="closeModal">
-                キャンセル
-              </div>
-              <div class="cursor-pointer rounded-full bg-black p-2 px-4 text-center font-semibold text-white"
-                @click="registOutlet()">
-                保存する
-              </div>
+          <div class="relative w-full">
+            <div class="rounded-lg border-2 border-gray-200 px-2 py-1.5" @click="togglePlace">{{ place }}</div>
+            <div v-if="isPlace" class="absolute w-full bg-white rounded-lg border-2 border-gray-200">
+              <div v-for="place in placeDropdown" class="px-2 py-1.5" @click="selectPlace(place.name)">{{ place.name
+              }}</div>
+            </div>
+          </div>
+        </div>
+        <!-- 詳細 -->
+        <div class="p-2">
+          <p class="font-bold">詳細</p>
+          <textarea id="description" type="text" placeholder="詳細" v-model="detail"
+            class="w-full min-h-20 rounded-lg border-2 border-gray-200 px-2 py-1.5"></textarea>
+        </div>
+        <!-- ボタン -->
+        <div class="bg-gray-100">
+          <div class="flex items-center justify-between p-2">
+            <div class="cursor-pointer p-2 text-center font-semibold" @click="closeModal">
+              キャンセル
+            </div>
+            <div class="cursor-pointer rounded-full bg-black p-2 px-4 text-center font-semibold text-white"
+              @click="registOutlet()">
+              保存する
             </div>
           </div>
         </div>
       </div>
-      <SharedLoading :is-loading="isLoading" />
     </div>
+    <SharedLoading :is-loading="isLoading" />
+  </div>
 </template>
-

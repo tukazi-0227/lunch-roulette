@@ -18,10 +18,8 @@
             <!-- 場所 -->
             <input id="name" type="text" v-model="name" class="w-3/4 rounded-lg border-2 border-gray-200 px-2 py-1.5" />
             <!-- ボタン -->
-            <button 
-              class="w-1/4 cursor-pointer rounded-full bg-black p-2 px-4 text-center font-semibold text-white"
-              :class="{'pointer-events-none bg-gray-500': places.length >= 4}"
-              @click="addPlace">
+            <button class="w-1/4 cursor-pointer rounded-full bg-black p-2 px-4 text-center font-semibold text-white"
+              :class="{ 'pointer-events-none bg-gray-500': places.length >= 4 }" @click="addPlace">
               追加
             </button>
           </div>
@@ -60,6 +58,8 @@
 
 <script setup lang="ts">
 import type { Place } from "@/@types/outlet";
+import { getApp } from "firebase/app";
+import { getFunctions, httpsCallable } from "firebase/functions";
 
 const props = defineProps({
   isPlaceModal: {
@@ -89,6 +89,19 @@ const addPlace = async () => {
       placeId: placeId.value,
     };
 
+    // 新規追加時サーバーサイドでバリデーション
+    const functions = getFunctions(getApp());
+    const apply = httpsCallable(
+      functions,
+      "api_validate_placeSum-check_placeSum",
+    );
+
+    const response = await apply(props.userId);
+
+    if (response.data) {
+      alert("登録上限です.")
+      return;
+    };
     await addNewPlace(placeData, props.userId);
 
     places.value = await getAllPlaces(props.userId);

@@ -4,7 +4,7 @@ import type { Outlet } from "@/@types/outlet";
 // @ts-ignore
 import { getAllSelectedOutlet } from "~/composables/outletRoulette";
 definePageMeta({
-  middleware: "auth",
+  middleware: ["auth", "validate-roulette"],
 });
 
 const auth = getAuth();

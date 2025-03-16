@@ -19,6 +19,9 @@ interface FunctionsObj {
 const funcs: FunctionsObj = {
   api_sample_index: "./sample/index",
   api_google_addOutlet: "./google/add-newOutlet",
+  api_validate_outletSum: "./validation/checkOutlet",
+  api_validate_placeSum: "./validation/checkPlace",
+  api_validate_rouletteSum: "./validation/checkRoulette",
 };
 
 const loadFunctions = (functionsObj: FunctionsObj) => {

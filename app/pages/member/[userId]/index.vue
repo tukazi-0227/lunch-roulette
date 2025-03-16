@@ -14,7 +14,7 @@ userId.value = route.params.userId as string;
 const restRouletteNum = ref<number>(0);
 
 const startMultiGame = () => {
-  return router.push(`/member/${userId}/choiceOutlet`);
+  return router.push(`/member/${userId.value}/choiceOutlet`);
 };
 
 onMounted(async () => {

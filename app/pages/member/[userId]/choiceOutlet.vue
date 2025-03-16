@@ -43,7 +43,7 @@ import { getAllOutlet } from "~/composables/outletManagement";
 import type { Place } from "@/@types/outlet"
 
 definePageMeta({
-  middleware: "auth",
+  middleware: ["auth", "validate-roulette"],
 });
 
 const route = useRoute();
