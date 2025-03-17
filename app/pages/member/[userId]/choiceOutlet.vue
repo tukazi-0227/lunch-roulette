@@ -44,6 +44,7 @@ import type { Place } from "@/@types/outlet"
 
 definePageMeta({
   middleware: ["auth", "validate-roulette"],
+  layout: "header",
 });
 
 const route = useRoute();

@@ -8,6 +8,7 @@ import { addSelectedOutlets } from "~/composables/outletRoulette";
 
 definePageMeta({
   middleware: ["auth", "validate-roulette"],
+  layout: "header",
 });
 
 const auth = getAuth();

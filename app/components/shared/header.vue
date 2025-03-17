@@ -1,6 +1,6 @@
 <template>
-  <div class="relative z-10 w-full bg-black text-white p-4">
-    <div class="absolute left-0 top-0 py-4">
+  <div class="relative z-10 flex justify-center w-full bg-black text-white p-4">
+    <div class="absolute left-0 top-0 py-6">
       <div class="grid items-center justify-center px-4" @click="toggleMenu">
         <svg viewBox="0 0 50 50" class="size-6 fill-white">
           <path
@@ -14,7 +14,10 @@
         </div>
       </div>
     </div>
-    <p class="font-semibold text-center">ランチルーレット</p>
+    <div class="w-32 overflow-hidden">
+      <img :src="'/images/logo/app_logo.png'" alt="ロゴ画像" />
+    </div>
+
   </div>
 </template>
 
@@ -22,15 +25,15 @@
 import { getAuth, signOut, } from 'firebase/auth';
 
 const auth = getAuth();
-const route = useRoute();
-const userId = route.params.userId;
+// const route = useRoute();
+const userId = auth.currentUser?.uid;
 const router = useRouter();
 
 const menus = (["ホーム画面", "お店編集", "ログアウト"]);
 
 const goPageBySelectMenu = (menuItem: string) => {
 
-  if(menuItem === menus[0]) {
+  if (menuItem === menus[0]) {
     // ホーム画面
     toggleMenu();
     router.push({ path: `/member/${userId}` });
@@ -46,7 +49,7 @@ const goPageBySelectMenu = (menuItem: string) => {
 
     console.log("ログアウトしました");
   }
-} 
+}
 
 const isMenu = ref<boolean>(false);
 const toggleMenu = () => {
@@ -54,7 +57,6 @@ const toggleMenu = () => {
 }
 
 onMounted(() => {
-  getAuth();
   isMenu.value = false;
 })
 </script>

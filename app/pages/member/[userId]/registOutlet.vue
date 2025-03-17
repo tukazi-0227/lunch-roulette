@@ -6,6 +6,7 @@ import { deleteOutlet, getAllOutlet } from "~/composables/outletManagement";
 
 definePageMeta({
   middleware: "auth",
+  layout: "header",
 });
 
 const auth = getAuth();

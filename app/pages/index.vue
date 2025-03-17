@@ -50,6 +50,10 @@
 import type { User } from "@/@types/user";
 import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
+definePageMeta({
+  middleware: ["auth"],
+});
+
 const auth = getAuth();
 const router = useRouter();
 

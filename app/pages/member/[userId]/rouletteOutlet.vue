@@ -5,6 +5,7 @@ import type { Outlet } from "@/@types/outlet";
 import { getAllSelectedOutlet } from "~/composables/outletRoulette";
 definePageMeta({
   middleware: ["auth", "validate-roulette"],
+  layout: "header",
 });
 
 const auth = getAuth();

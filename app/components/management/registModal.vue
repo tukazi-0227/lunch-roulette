@@ -25,6 +25,19 @@ const props = defineProps({
 
 const emit = defineEmits(["close"]);
 
+// バリデーション
+const errors = reactive({
+  name: false,
+  place: false,
+});
+
+const validateData = () => {
+  errors.name = !name.value;
+  errors.place = place.value === "選択する";
+
+  return errors.name || errors.place;
+};
+
 // ドロップダウン
 const name = ref<string>("");
 const detail = ref<string>("");
@@ -160,8 +173,6 @@ const deleteImageFile = async (id: string) => {
   try {
     isLoading.value = true;
 
-    if (!confirm("画像を削除してよろしいですか?")) return;
-
     const data = await getOutlet(id, props.userId);
     const decodedUrl = decodeURIComponent(data.outlet.value!.imageUrl);
     const regex = /\/o\/(.*?)\?/;
@@ -175,8 +186,6 @@ const deleteImageFile = async (id: string) => {
     }
 
     await deleteOutletImageUrl(id, props.userId);
-
-    alert("画像を削除しました");
     closeModal();
   } catch (error) {
     console.error("Failed to delete file, try again!!");
@@ -185,19 +194,25 @@ const deleteImageFile = async (id: string) => {
   }
 };
 
-// 新規追加
+// 新規追加&更新
 const registOutlet = async () => {
   try {
     isLoading.value = true;
 
+    // バリデーション
+    if (validateData()) return;
+
     let finalImageUrl = imageUrl.value;
     if (_imageFile.value) {
+      // 以前の画像は削除
+      deleteImageFile(outletId.value);
+
       const filename = encodeURIComponent(_imageFile.value.name);
       const path = `users/${props.userId}/outletImages/${filename}`;
       // @ts-ignore
       const url = await useNuxtApp().$uploadImage(_imageFile.value, path);
       finalImageUrl = url;
-    }
+    };
 
     const outlet: Outlet = {
       id: outletId.value,
@@ -314,6 +329,7 @@ onMounted(async () => {
             </div>
           </div>
           <input id="name" type="text" v-model="name" class="w-full rounded-lg border-2 border-gray-200 px-2 py-1.5" />
+          <p v-if="errors.name" class="text-xs font-semibold text-red-500">名前を入力してください</p>
         </div>
         <!-- 場所 -->
         <div class="p-2">
@@ -325,6 +341,7 @@ onMounted(async () => {
           </div>
           <div class="relative w-full">
             <div class="rounded-lg border-2 border-gray-200 px-2 py-1.5" @click="togglePlace">{{ place }}</div>
+            <p v-if="errors.place && !isPlace" class="text-xs font-semibold text-red-500">場所を入力してください</p>
             <div v-if="isPlace" class="absolute w-full bg-white rounded-lg border-2 border-gray-200">
               <div v-for="place in placeDropdown" class="px-2 py-1.5" @click="selectPlace(place.name)">{{ place.name
               }}</div>

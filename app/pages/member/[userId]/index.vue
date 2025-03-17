@@ -2,6 +2,7 @@
 import type { Roulette } from "@/@types/roulette";
 definePageMeta({
   middleware: "auth",
+  layout: "header",
 });
 
 const thisMonthRoulettes = ref<Roulette[]>();
