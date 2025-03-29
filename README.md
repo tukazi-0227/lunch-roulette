@@ -1,75 +1,61 @@
-# Nuxt Minimal Starter
+# 概要
+### [ご飯たべたべルーレット(スマホのみ対応)](https://lunch-roulette-three.vercel.app/)
+- お店を地域ごとに登録してルーレットでお店を決めてくれるアプリになっています。
+- プレイヤー人数は 1人 or 2 ~ 4人で遊べます。
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+## 技術スタック
+LUNCH-ROULETTEは以下の技術を利用しています。
+- [Nuxt3](https://nuxt.com/docs/getting-started/introduction)
+- [TailwindCSS](https://tailwindcss.com)
+- [Firebase](https://firebase.google.com)
+- [GCP](https://cloud.google.com)
+- [Vercel](https://vercel.com)
 
-## Setup
+## 環境構築手順書
+- node : v20.14.0
+- npm : 10.7.0
 
-Make sure to install dependencies:
+## ① ローカルのパソコンに作業用のフォルダを作成します。
+## ② Gitからソースをクローンします。
+- cd {作業用ディレクトリ}
+- git init
+- git remote add origin https://github.com/tukazi-0227/lunch-roulette.git
+- git remote -v
+  - → 登録できていることを確認
+- git pull origin main
+  - ソースクローン完了！
+## ③ npm install
 
-```bash
-# npm
-npm install
+クローンしたソースでnpm installをします。
 
-# pnpm
-pnpm install
+- npm install
 
-# yarn
-yarn install
+## ④ 環境変数
+- 所有者である私に連絡して受け取って下さい
+- 受け取ったファイルをルートディレクトリに.envとして保存
+## ⑤ CMSの起動の確認
 
-# bun
-bun install
-```
+- npm run dev
+  - → localhost:3000/login を起動する
 
-## Development Server
+環境構築完了です！ 👏 おつかれさまでした！
 
-Start the development server on `http://localhost:3000`:
+## プロジェクトの仕組み
+◆ あまり意識しなくていい
+- .nuxt → ビルドされたJavaScript群のファイルが作られている（開発で意識する必要はない）
+- .output → ビルドされたJavaScript群のファイルが作られている（開発で意識する必要はない）
+- .vscode → .vscodeの設定を共有するためのもの
+- node_modules → npmライブラリ群
+- .gitignore → gitで管理しないファイル・ソース・ディレクトリ等を記載する
+- tsconfig.json → typeScriptの定義ファイル
+- package-lock.json
+- package.json
 
-```bash
-# npm
-npm run dev
+◆ 開発に必要
 
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+- @types → 開発で使い回す型定義ファイルが集まっているディレクトリ
+- app → 開発に必要なファイルが集まっているディレクトリ
+- public → 静的なファイル（画像とか）はここにおく
+- .env → 環境変数のファイル
+- nuxt.config.ts → Nuxt3のプロジェクトの設定
+- tailwind.config.js → Tailwind使わないなら不要
