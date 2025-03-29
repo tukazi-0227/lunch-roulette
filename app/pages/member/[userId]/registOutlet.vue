@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import type { Outlet, Place, ToComPonentForm } from "@/@types/outlet";
 import { getAuth, onAuthStateChanged, } from "firebase/auth";
-// @ts-ignore
-import { deleteOutlet, getAllOutlet } from "~/composables/outletManagement";
 
 definePageMeta({
   middleware: "auth",

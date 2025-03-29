@@ -8,7 +8,7 @@
           </path>
         </svg>
       </div>
-      <div v-if="isMenu" class="absolute top-full w-32 bg-gray-700 rounded-b-lg">
+      <div v-if="isMenu" class="absolute top-full w-32 bg-gray-700 rounded-br-lg">
         <div v-for="(menu, index) in menus" :key="index">
           <p class="p-3" @click="goPageBySelectMenu(menu)">{{ menu }}</p>
         </div>

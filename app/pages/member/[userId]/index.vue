@@ -14,6 +14,10 @@ userId.value = route.params.userId as string;
 
 const restRouletteNum = ref<number>(0);
 
+const startSoloGame = () => {
+  return router.push(`/member/${userId.value}/rouletteOutletSolo`);
+};
+
 const startMultiGame = () => {
   return router.push(`/member/${userId.value}/choiceOutlet`);
 };
@@ -26,33 +30,46 @@ onMounted(async () => {
 
 <template>
   <div>
-    <div class="flex items-end p-5">
-      <p class="font-bold">今月残り</p>
-      <p class="font-bold px-2">{{ restRouletteNum }}ルーレット</p>
+    <div>
+      <p class="text-center font-bold text-xl p-2">今月のルーレット記録</p>
     </div>
-    <p class="font-bold p-5">ステータス</p>
-    <div class="flex items-center justify-start p-5">
-      <div class="size-32 overflow-hidden rounded-full">
-        <img :src="'/images/icon/iconme.JPG'" alt="ロゴ画像" />
+    <!-- 一人用 -->
+    <div>
+      <div class="flex items-end border-b-2 border-black m-2">
+        <p class="font-semibold">何回でも遊べる</p>
       </div>
-      <div class="">
-        <p class="text-xl text-start px-2">Level.99</p>
-        <p class="w-48 bg-green-500 border-2 boerder-gray-700 rounded-full p-1"></p>
+      <div class="flex items-center justify-between">
+        <div class="p-2 font-semibold">
+          <p>1人で行うルーレットです。</p>
+          <p>地域から選べます。</p>
+        </div>
+        <button
+          class="size-24 grid items-center bg-gray-500 text-center text-white font-semibold p-2 m-2 rounded-lg hover:bg-gray-800"
+          :class="{'pointer-events-none bg-gray-700': restRouletteNum <= 0}"
+          @click="startSoloGame"
+        >
+          1人で
+        </button>
       </div>
     </div>
-    <div class="flex items-center justify-center space-x-10">
-      <button
-        class="size-32 grid items-center bg-gray-500 text-center text-white font-semibold p-2 rounded-full hover:bg-gray-800"
-        :class="{'pointer-events-none bg-gray-700': restRouletteNum <= 0}"
-      >
-        一人で遊ぶ
-      </button>
-      <button
-        class="size-32 grid items-center bg-gray-500 text-center text-white font-semibold p-2 rounded-full hover:bg-gray-800"
-        :class="{'pointer-events-none bg-gray-700': restRouletteNum <= 0}"
-        @click="startMultiGame">
-        みんなで遊ぶ
-      </button>
+    <div>
+      <div class="flex items-end border-b-2 border-black m-2">
+        <p class="font-bold">今月残り</p>
+        <p class="font-bold px-2">{{ restRouletteNum }}ルーレット</p>
+      </div>
+      <div class="flex items-center justify-between">
+        <div class="p-2 font-semibold">
+          <p>2 ~ 4人で行うルーレットです。</p>
+          <p>地域から選べます。</p>
+        </div>
+        <button
+          class="size-24 grid items-center bg-gray-500 text-center text-white font-semibold p-2 m-2 rounded-lg hover:bg-gray-800"
+          :class="{'pointer-events-none bg-gray-700': restRouletteNum <= 0}"
+          @click="startMultiGame">
+          みんなで
+        </button>
+      </div>
     </div>
+  
   </div>
 </template>
