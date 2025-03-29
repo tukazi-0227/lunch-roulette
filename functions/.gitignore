@@ -9,5 +9,5 @@ typings/
 node_modules/
 *.local
 
-config
+config/serviceAccountKey.json
 lib/config/serviceAccountKey.json
