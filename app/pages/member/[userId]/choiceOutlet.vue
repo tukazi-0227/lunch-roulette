@@ -38,8 +38,6 @@
 
 <script setup lang="ts">
 import { getAuth } from "firebase/auth";
-// @ts-ignore
-import { getAllOutlet } from "~/composables/outletManagement";
 import type { Place } from "@/@types/outlet"
 
 definePageMeta({
@@ -47,8 +45,9 @@ definePageMeta({
   layout: "header",
 });
 
+const auth = getAuth();
 const route = useRoute();
-const userId = route.params.userId as string;
+const userId = route.params.userId as string || auth.currentUser?.uid as string;
 
 const router = useRouter(); 
 const outletData = ref<any[]>([]);
@@ -111,8 +110,7 @@ const goSelectOutlet = () => {
 }
 
 onMounted(async () => {
-  getAuth();
-  outletData.value = await getAllOutlet();
+  outletData.value = await getAllOutlet(userId);
   placeDropdown.value = await getAllPlaces(userId);
   validateReset();
 });
