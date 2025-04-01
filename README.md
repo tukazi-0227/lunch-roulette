@@ -11,6 +11,45 @@ LUNCH-ROULETTEは以下の技術を利用しています。
 - [GCP](https://cloud.google.com)
 - [Vercel](https://vercel.com)
 
+## DB設計
+### コレクション
+| Collection | Collection |
+| ---------- | ---------- |
+|users       | outlet     |
+|            | place      |
+|            | roulette   |
+
+### 各コレクションのフィールド
+#### 1. users/
+| Collection | Doc        | Type       |
+| ---------- | ---------- | ---------- |
+|users       | userId     | string     |
+|            | id         | string     |
+|            | password   | string     |
+
+#### 2. users/{userId}/outlet/{id}
+| Collection | Doc        | Type       |
+| ---------- | ---------- | ---------- |
+|outlet      | createdAt  | Timestamp  |
+|            | id         | string     |
+|            | detail     | string     |
+|            | imageURL   | string     |
+|            | name       | string     |
+|            | place      | string     |
+
+#### 3. users/{userId}/place/{id}
+| Collection | Doc        | Type       |
+| ---------- | ---------- | ---------- |
+|place       | placeId    | string     |
+|            | name       | string     |
+
+#### 4. users/{userId}/place/{id}
+| Collection | Doc        | Type       |
+| ---------- | ---------- | ---------- |
+|roulette    | outlet?    | 2のoutlet   |
+|            | createdAt? | Timestamp  |
+|            | outlets?   | 2のoutlet配列|
+
 ## 環境構築手順書
 - node : v20.14.0
 - npm : 10.7.0
