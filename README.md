@@ -3,6 +3,9 @@
 - お店を地域ごとに登録してルーレットでお店を決めてくれるアプリになっています。
 - プレイヤー人数は 1人 or 2 ~ 4人で遊べます。
 
+#### テストユーザー (新規登録の際はemailアドレスと6文字以上のパスワードが必要)
+- ID : test@test.com
+- PASSWORD : testuser
 ## 技術スタック
 LUNCH-ROULETTEは以下の技術を利用しています。
 - [Nuxt3](https://nuxt.com/docs/getting-started/introduction)
