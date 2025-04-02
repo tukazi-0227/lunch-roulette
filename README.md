@@ -6,6 +6,7 @@
 #### テストユーザー (新規登録の際はemailアドレスと6文字以上のパスワードが必要)
 - ID : test@test.com
 - PASSWORD : testuser
+##### ぜひ遊んでみて下さい！！
 ## 技術スタック
 LUNCH-ROULETTEは以下の技術を利用しています。
 - [Nuxt3](https://nuxt.com/docs/getting-started/introduction)
