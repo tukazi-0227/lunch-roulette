@@ -106,6 +106,7 @@ const addPlace = async () => {
 
     places.value = await getAllPlaces(props.userId);
     placeId.value = crypto.randomUUID();
+    
   } catch (error) {
     console.error("場所を追加できませんでした", error)
   } finally {

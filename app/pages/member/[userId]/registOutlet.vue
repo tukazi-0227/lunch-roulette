@@ -71,7 +71,7 @@ const openNew = () => {
   };
 };
 
-const openEdit = (item: Outlet) => {
+const openEdit = async (item: Outlet) => {
   isModalOpen.value = true;
   isEditingMode.value = true;
 
@@ -84,6 +84,7 @@ const openEdit = (item: Outlet) => {
     imageUrl: item.imageUrl,
     _imagePreview: item.imageUrl,
   };
+  placeDropdown.value = await getAllPlaces(userId.value);
 };
 
 const closeModal = async () => {
@@ -91,6 +92,8 @@ const closeModal = async () => {
   outletData.value = await getAllOutlet(userId.value);
   restAddOutlet.value = 40 - outletData.value.length;
   clearInput();
+  placeDropdown.value = await getAllPlaces(userId.value);
+
 };
 
 const clearInput = () => {
