@@ -32,6 +32,11 @@ onMounted(async () => {
   <div>
     <div>
       <p class="text-center font-bold text-xl p-2">今月のルーレット記録</p>
+      <div class="flex items-center justify-center p-2">
+        <div class="flex items-center justify-center text-2xl font-bold bg-gray-500 text-white w-full h-40 rounded-xl">
+          <p>実装予定...</p>
+        </div>
+      </div>
     </div>
     <!-- 一人用 -->
     <div>

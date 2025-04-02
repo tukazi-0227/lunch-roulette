@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
 import type { Outlet } from "@/@types/outlet";
-// @ts-ignore
-import { getOutletsByPlace } from "~/composables/outletManagement";
-// @ts-ignore
-import { addSelectedOutlets } from "~/composables/outletRoulette";
 
 definePageMeta({
   middleware: ["auth", "validate-roulette"],
@@ -13,10 +9,10 @@ definePageMeta({
 
 const auth = getAuth();
 const route = useRoute();
-const userId = route.params.userId;
 const router = useRouter();
 
-const selectedPlace = route.query.place;
+const userId = route.params.userId as string;
+const selectedPlace = route.query.place as string;
 const selectedNumber = ref<number>(0);
 const checkNumber = () => {
   if (selectedNumber.value > 4) {

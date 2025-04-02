@@ -46,8 +46,9 @@ const isLoading = ref<boolean>(false);
 const isPlace = ref<boolean>(false);
 
 const placeDropdown = ref<Place[]>([]);
-const togglePlace = () => {
+const togglePlace = async () => {
   isPlace.value = !isPlace.value;
+  placeDropdown.value = await getAllPlaces(props.userId);
 };
 const selectPlace = (item: string) => {
   place.value = item;
@@ -63,6 +64,7 @@ const _imagePreview = ref<string | undefined>(undefined);
 
 // Google API関連
 const isGoogle = ref<boolean>(false);
+const isSearch = ref<boolean>(false);
 const autocompleteInput = ref<HTMLInputElement | null>(null);
 const selectedPlaceId = ref<string>("");
 const shortName = (fullName: string) => {
@@ -74,6 +76,7 @@ const shortName = (fullName: string) => {
   };
 };
 
+// Google APIから情報読み取り
 const getPlaceDetails = (placeId: string) => {
   const service = new (window as any).google.maps.places.PlacesService(document.createElement("div"));
   const request = {
@@ -98,6 +101,7 @@ const getPlaceDetails = (placeId: string) => {
 watch(
   () => isGoogle.value,
   async (val) => {
+    isSearch.value = true;
     if (val) {
       await nextTick();
       if (!(window as any).google || !(window as any).google.maps) {
@@ -124,6 +128,7 @@ watch(
         selectedPlaceId.value = place.place_id;
         if (place.name) {
           autocompleteInput.value = place.name;
+          isSearch.value = false;
         }
 
         name.value = shortName(place.name) as string;
@@ -178,7 +183,7 @@ const deleteImageFile = async (id: string) => {
     const regex = /\/o\/(.*?)\?/;
     const match = decodedUrl.match(regex);
 
-    // @ts-ignore
+    // @ts-ignore 型エラーが出るため
     const resultStorage = await useNuxtApp().$deleteImage(match![1]);
     if (!resultStorage) {
       console.error("Storage削除に失敗しました");
@@ -204,12 +209,12 @@ const registOutlet = async () => {
 
     let finalImageUrl = imageUrl.value;
     if (_imageFile.value) {
-      // 以前の画像は削除
-      deleteImageFile(outletId.value);
+      // 以前の画像は削除 TODO: 制御できるようにする
+      // deleteImageFile(outletId.value);
 
       const filename = encodeURIComponent(_imageFile.value.name);
       const path = `users/${props.userId}/outletImages/${filename}`;
-      // @ts-ignore
+      // @ts-ignore 型エラーが出るため
       const url = await useNuxtApp().$uploadImage(_imageFile.value, path);
       finalImageUrl = url;
     };
@@ -291,7 +296,7 @@ onMounted(async () => {
         </div>
         <div v-if="isGoogle" class="flex items-center justify-center">
           <div class="w-full ">
-            <div class="p-2">
+            <div v-if="isSearch" class="p-2">
               <p class="font-bold mr-1">Google検索</p>
               <input ref="autocompleteInput" type="text" placeholder="お店の名前を検索"
                 class="w-full rounded-lg border-2 border-gray-200 px-2 py-1.5" />
@@ -368,6 +373,6 @@ onMounted(async () => {
         </div>
       </div>
     </div>
-    <SharedLoading :is-loading="isLoading" />
+    <SharedLoading :is-loading="isLoading" class="z-50"/>
   </div>
 </template>

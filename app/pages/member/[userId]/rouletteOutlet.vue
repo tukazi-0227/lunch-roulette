@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { getAuth, onAuthStateChanged, } from "firebase/auth";
 import type { Outlet } from "@/@types/outlet";
-// @ts-ignore
-import { getAllSelectedOutlet } from "~/composables/outletRoulette";
 definePageMeta({
   middleware: ["auth", "validate-roulette"],
   layout: "header",
@@ -12,8 +10,8 @@ const auth = getAuth();
 const router = useRouter();
 const route = useRoute();
 
-const userId = route.params.userId;
-const rouletteId = route.query.roulette_id;
+const userId = route.params.userId as string;
+const rouletteId = route.query.roulette_id as string;
 const rouletteOutlets = ref<Outlet[]>([]);
 const resultOutlet = ref<Outlet>();
 
@@ -45,7 +43,7 @@ const goHome = () => {
 onMounted(async () => {
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      rouletteOutlets.value = await getAllSelectedOutlet(rouletteId, userId);
+      rouletteOutlets.value = await getAllSelectedOutlet(rouletteId, userId) as Outlet[];
     }
   });
 });
