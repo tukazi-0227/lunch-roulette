@@ -8,6 +8,11 @@ export interface Outlet {
     imageUrl: string,
     createdAt: Timestamp,
 };
+export interface Result {
+    outlet: Outlet,
+    roulettedAt: Timestamp,
+    rouletteId: string,
+};
 
 export interface Place {
     name: string,
