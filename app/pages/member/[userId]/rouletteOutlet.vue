@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { getAuth, onAuthStateChanged, } from "firebase/auth";
-import type { Outlet } from "@/@types/outlet";
+import type { Outlet, Result } from "@/@types/outlet";
+import { Timestamp } from "firebase/firestore";
 definePageMeta({
   middleware: ["auth", "validate-roulette"],
   layout: "header",
@@ -25,11 +26,17 @@ const closeModal = () => {
 };
 
 // ルーレットを実行
-const roulettingOutlet = () => {
+const roulettingOutlet = async () => {
   isLotterying.value = true;
+  const randomIndex = Math.floor(Math.random() * rouletteOutlets.value.length);
+  resultOutlet.value = rouletteOutlets.value[randomIndex];
+  const rouletteData: Result = {
+    outlet: resultOutlet.value as Outlet,
+    roulettedAt: Timestamp.now(),
+    rouletteId: rouletteId,
+  }
+  await addResultOutlets(rouletteData, userId);
   setTimeout(() => {
-    const randomIndex = Math.floor(Math.random() * rouletteOutlets.value.length);
-    resultOutlet.value = rouletteOutlets.value[randomIndex];
     isLotterying.value = false;
     isModal.value = true;
     isLouletted.value = true;

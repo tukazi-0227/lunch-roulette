@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import type { Roulette } from "@/@types/roulette";
+import type { Result } from "@/@types/outlet";
+import type { Timestamp } from "firebase/firestore";
 definePageMeta({
   middleware: "auth",
   layout: "header",
 });
 
-const thisMonthRoulettes = ref<Roulette[]>();
+const thisMonthRoulettes = ref<Result[]>();
 
 const route = useRoute();
 const router = useRouter();
@@ -22,8 +23,13 @@ const startMultiGame = () => {
   return router.push(`/member/${userId.value}/choiceOutlet`);
 };
 
+const formattedTimestamp = (time: Timestamp) => {
+  const timestampMs = (time as any) * 1000 + Math.floor(time.nanoseconds / 1_000_000);
+  const date = new Date(timestampMs);
+  return `${date.getMonth() + 1}月${date.getDate()}日${date.getHours()}時${date.getMinutes()}分`
+}
 onMounted(async () => {
-  thisMonthRoulettes.value = await getAllRoulette(userId.value);
+  thisMonthRoulettes.value = await getAllResultRoulette(userId.value);
   restRouletteNum.value = 50 - thisMonthRoulettes.value.length;
 })
 </script>
@@ -32,11 +38,24 @@ onMounted(async () => {
   <div>
     <div>
       <p class="text-center font-bold text-xl p-2">今月のルーレット記録</p>
-      <div class="flex items-center justify-center p-2">
-        <div class="flex items-center justify-center text-2xl font-bold bg-gray-500 text-white w-full h-40 rounded-xl">
-          <p>実装予定...</p>
+      <div v-if="thisMonthRoulettes?.length === 0" class="flex items-center justify-center p-2">
+        <div class="flex items-center justify-center text-lg font-bold bg-gray-500 text-white w-full h-40 rounded-xl">
+          <p>今月はまだルーレットが行われていません</p>
         </div>
       </div>
+      <div class="flex overflow-x-auto flex-nowrap">
+      <div v-for="result in thisMonthRoulettes" class="flex-shrink-0">
+        <div class="p-2">
+          <img v-if="result.outlet.imageUrl" :src="result.outlet.imageUrl" alt="プレビュー画像" class="size-36 object-cover rounded-lg" />
+          <img v-else-if="result.outlet.imageUrl" :src="result.outlet.imageUrl" alt="登録済画像" class="size-36 object-cover rounded-lg" />
+          <div v-else class="flex size-36 items-center justify-center text-center rounded-lg bg-gray-400 text-white">
+            No image
+          </div>
+          <p class="text-center p-2 font-semibold">{{ result.outlet.name }}</p>
+          <p class="text-center p-2 font-semibold">{{ formattedTimestamp(result.roulettedAt) }}</p>
+        </div>
+      </div>
+    </div>
     </div>
     <!-- 一人用 -->
     <div>
